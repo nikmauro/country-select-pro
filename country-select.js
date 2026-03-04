@@ -1,5 +1,12 @@
 /**
  * CountrySelect Pro v4.8
+ * (c) 2024 nikmauro
+ * Released under the MIT License.
+ * Repository: https://github.com/nikmauro/country-select-pro
+ */
+
+/**
+ * CountrySelect Pro v4.8
  * ---------------------------------------------------------------------------
  * EXAMPLES & DATA ATTRIBUTES:
  * * 1. Default (ISO Code): 
