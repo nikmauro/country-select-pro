@@ -30,3 +30,5 @@ Just include the JS file from jsDelivr:
 ```html
 
 <script src="[https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro/country-select.min.js](https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro/country-select.min.js)"></script>
+
+Developed by nikmauro with the collaborative assistance of Gemini (Google AI).
