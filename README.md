@@ -20,7 +20,8 @@ A lightweight, zero-dependency, vanilla JavaScript country selector with localiz
 
 - 📱 **Responsive & Accessible**: Keyboard navigation and mobile-friendly UI.
 
-
+## Demo
+https://jsfiddle.net/538fjw7n/2/
 
 ## Installation
 
