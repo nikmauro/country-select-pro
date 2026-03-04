@@ -21,7 +21,7 @@ A lightweight, zero-dependency, vanilla JavaScript country selector with localiz
 - 📱 **Responsive & Accessible**: Keyboard navigation and mobile-friendly UI.
 
 ## Demo
-https://jsfiddle.net/538fjw7n/2/
+https://nikmauro.github.io/country-select-pro/
 
 ## Installation
 
