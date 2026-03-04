@@ -28,4 +28,4 @@ Just include the JS file from jsDelivr:
 
 ```html
 
-<script src="[https://cdn.jsdelivr.net/gh/YOUR_USERNAME/country-select-pro@v4.8/country-select.min.js](https://cdn.jsdelivr.net/gh/YOUR_USERNAME/country-select-pro@v4.8/country-select.min.js)"></script>
+<script src="[https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro/country-select.min.js](https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro/country-select.min.js)"></script>
