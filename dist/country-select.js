@@ -1,11 +1,11 @@
 /**
- * CountrySelect Pro v4.8.3
+ * CountrySelect Pro v5.4 - Final Production Version
  * ---------------------------------------------------------------------------
- * Features: 
- * - SVG Arrow Down icon
- * - HTMX Auto-initialization
- * - Improved Validation UI
- * - Zero Dependencies
+ * Features:
+ * - Instant Snap Scroll (No more slow scrolling to selected item)
+ * - HTMX & MutationObserver Hardened (Bulletproof re-initialization)
+ * - SVG Down Arrow Icon & Bootstrap 5 Support
+ * - Zero Dependencies & Native Validation
  * ---------------------------------------------------------------------------
  */
 
@@ -14,7 +14,6 @@ class CountrySelect {
         this.input = element;
         if (!this.input) return;
 
-        // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
         this.valueType = this.input.dataset.valueType || "code"; 
@@ -63,14 +62,14 @@ class CountrySelect {
             .cs-wrapper.open .cs-dropdown { display: block; }
             .cs-search-box { padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; }
             .cs-search-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline: none; }
-            .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: smooth; min-height: 50px; }
+            .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: auto; min-height: 50px; }
             .cs-option { height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; box-sizing: border-box; color: #333; }
             .cs-option:hover, .cs-option.active { background: #f0f7ff; color: #0056b3; }
             .cs-wrapper img { width: 22px !important; height: 15px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
             .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v5-styles';
+        const styleId = 'cs-v54-final-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -172,7 +171,11 @@ class CountrySelect {
             this._renderOptions();
             const list = this.wrapper.querySelector('.cs-list');
             list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
-            if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 50);
+            
+            // Snap Scroll: Instant movement to active item
+            if (this.activeIndex > -1) {
+                setTimeout(() => this._scrollToActive(), 0);
+            }
             if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
         }
         this.wrapper.classList.toggle('open', this.isOpen);
@@ -203,23 +206,25 @@ class CountrySelect {
 
     _scrollToActive() {
         const list = this.wrapper.querySelector('.cs-list');
-        const activeItem = list.querySelectorAll('.cs-option')[this.activeIndex];
-        if (activeItem) list.scrollTop = activeItem.offsetTop - (list.offsetHeight / 2) + (this.rowHeight / 2);
+        const options = list.querySelectorAll('.cs-option');
+        const activeItem = options[this.activeIndex];
+        if (activeItem) {
+            const scrollPos = activeItem.offsetTop - (list.offsetHeight / 2) + (this.rowHeight / 2);
+            list.scrollTop = scrollPos;
+        }
     }
 }
 
 /**
- * v5.3 - HTMX & Dynamic Content Hardened Logic
+ * HTMX & MUTATION OBSERVER HARDENED LOGIC
  */
 const initCS = (target) => {
     const root = target || document;
     if (!root.querySelectorAll) return;
 
     root.querySelectorAll('.country-select').forEach(el => {
-        // Πιο αυστηρός έλεγχος για να μην διπλασιάζεται
         const next = el.nextSibling;
         const hasWrapper = next && next.classList && next.classList.contains('cs-wrapper');
-        
         if (!hasWrapper) {
             new CountrySelect(el);
         }
@@ -227,35 +232,25 @@ const initCS = (target) => {
 };
 
 const setupListeners = () => {
-    // 1. Initial Load
     initCS(document);
-
-    // 2. HTMX Listeners (Πολλαπλά events για σιγουριά)
+    
     const htmxEvents = ['htmx:afterProcess', 'htmx:afterOnLoad', 'htmx:afterSettle'];
-    htmxEvents.forEach(evtName => {
-        document.body.addEventListener(evtName, (e) => {
-            // Αν το HTMX επιστρέφει ολόκληρη φόρμα ή μόνο το inner content
+    htmxEvents.forEach(evt => {
+        document.body.addEventListener(evt, (e) => {
             const target = e.detail.target || e.target;
             initCS(target);
         });
     });
 
-    // 3. Mutation Observer - Η απόλυτη δικλείδα ασφαλείας
     const observer = new MutationObserver((mutations) => {
         for (let mutation of mutations) {
-            if (mutation.addedNodes.length) {
-                initCS(mutation.target);
-            }
+            if (mutation.addedNodes.length) initCS(mutation.target);
         }
     });
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    observer.observe(document.body, { childList: true, subtree: true });
 };
 
-// Execution Trigger
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupListeners);
 } else {
