@@ -1,6 +1,6 @@
 {
 	"name": "ccountry-select-pro",
-	"version": "4.9.1",
+	"version": "4.8.2",
 	"description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
 	"main": "dist/country-select.js",
 	"repository": {
@@ -10,7 +10,11 @@
 	"keywords": [
 		"country",
 		"international",
-		"vanilla"
+	    "vanilla",
+	   "country",
+ 	   "dropdown",
+       "flags",
+   	   "select"
 	],
 	"scripts": {
 		"build": "gulp build"
