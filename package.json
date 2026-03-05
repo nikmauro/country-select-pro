@@ -1,0 +1,24 @@
+{
+	"name": "ccountry-select-pro",
+	"version": "4.9.1",
+	"description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
+	"main": "dist/country-select.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nikmauro/country-select-pro.git"
+	},
+	"keywords": [
+		"country",
+		"international",
+		"vanilla"
+	],
+	"scripts": {
+		"build": "gulp build"
+	},
+	"author": "Nikolaos Mavroidis",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/nikmauro/country-select-pro/issues"
+	},
+	"homepage": "https://github.com/nikmauro/country-select-pro"
+}
