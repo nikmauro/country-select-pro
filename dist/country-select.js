@@ -1,11 +1,11 @@
 /**
- * CountrySelect Pro v5.4 - Final Production Version
+ * CountrySelect Pro v5.5 - Smart Position Edition
  * ---------------------------------------------------------------------------
  * Features:
- * - Instant Snap Scroll (No more slow scrolling to selected item)
- * - HTMX & MutationObserver Hardened (Bulletproof re-initialization)
- * - SVG Down Arrow Icon & Bootstrap 5 Support
- * - Zero Dependencies & Native Validation
+ * - Smart Dropdown: Automatically flips to "drop-up" if near screen bottom.
+ * - Instant Snap Scroll: No lag when opening a selected country.
+ * - HTMX & MutationObserver: Full support for dynamic checkouts.
+ * - Zero external dependencies (No Popper.js required).
  * ---------------------------------------------------------------------------
  */
 
@@ -58,8 +58,16 @@ class CountrySelect {
             .cs-error-msg { display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10; }
             .cs-wrapper.is-invalid .cs-error-msg { display: block; }
             .cs-wrapper:focus .cs-trigger { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
-            .cs-dropdown { position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #ccc; z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; max-width: 95vw; }
+            
+            .cs-dropdown { 
+                position: absolute; left: 0; background: #fff; border: 1px solid #ccc; 
+                z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+                border-radius: 6px; overflow: hidden; max-width: 95vw;
+            }
+            
+            .cs-wrapper.drop-up .cs-dropdown { box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
             .cs-wrapper.open .cs-dropdown { display: block; }
+            
             .cs-search-box { padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; }
             .cs-search-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline: none; }
             .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: auto; min-height: 50px; }
@@ -69,7 +77,7 @@ class CountrySelect {
             .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v54-final-styles';
+        const styleId = 'cs-v55-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -97,7 +105,24 @@ class CountrySelect {
         const dropdown = this.wrapper.querySelector('.cs-dropdown');
         dropdown.style.width = (this.dropdownWidth === 'auto') ? '100%' : this.dropdownWidth;
         this.input.parentNode.insertBefore(this.wrapper, this.input.nextSibling);
-        if (this.input.classList.contains('is-invalid')) this._showError();
+    }
+
+    _updatePosition() {
+        const dropdown = this.wrapper.querySelector('.cs-dropdown');
+        const rect = this.wrapper.getBoundingClientRect();
+        const dropdownHeight = (this.rowLimit * this.rowHeight) + (this.hasSearch ? 50 : 0);
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+            this.wrapper.classList.add('drop-up');
+            dropdown.style.bottom = 'calc(100% + 8px)';
+            dropdown.style.top = 'auto';
+        } else {
+            this.wrapper.classList.remove('drop-up');
+            dropdown.style.top = 'calc(100% + 8px)';
+            dropdown.style.bottom = 'auto';
+        }
     }
 
     async _loadData() {
@@ -113,7 +138,7 @@ class CountrySelect {
             this.filteredCountries = [...this.countries];
             this._renderOptions();
             this._syncInitialValue();
-        } catch (e) { console.error("CountrySelect: API Failed", e); }
+        } catch (e) { console.error("CountrySelect API Fail", e); }
     }
 
     _syncInitialValue() {
@@ -121,7 +146,6 @@ class CountrySelect {
         if (!val) { this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder; return; }
         const current = this.countries.find(c => this.valueType === "phone" ? c.phone === val : this.valueType === "name" ? c.name === val : c.code === val);
         if (current) this._updateUI(current);
-        else this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder;
     }
 
     _parseTemplate(template, country) {
@@ -156,26 +180,17 @@ class CountrySelect {
         if(content) content.innerHTML = this._parseTemplate(this.schemaReturn, country);
     }
 
-    _showError() {
-        const errorDiv = this.wrapper.querySelector('.cs-error-msg');
-        errorDiv.textContent = this.input.validationMessage || "Invalid selection";
-        this.wrapper.classList.add('is-invalid');
-    }
-
     _toggle(force) {
         if (this.countries.length === 0) return; 
         this.isOpen = force !== undefined ? force : !this.isOpen;
         if (this.isOpen) {
+            this._updatePosition();
             document.dispatchEvent(new CustomEvent('cs-close-others', { detail: { opener: this.wrapper } }));
             this.activeIndex = this.filteredCountries.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
             this._renderOptions();
             const list = this.wrapper.querySelector('.cs-list');
             list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
-            
-            // Snap Scroll: Instant movement to active item
-            if (this.activeIndex > -1) {
-                setTimeout(() => this._scrollToActive(), 0);
-            }
+            if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 0);
             if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
         }
         this.wrapper.classList.toggle('open', this.isOpen);
@@ -183,7 +198,6 @@ class CountrySelect {
 
     _bindEvents() {
         this.wrapper.querySelector('.cs-trigger').onclick = (e) => { e.stopPropagation(); this._toggle(); };
-        this.input.addEventListener('invalid', (e) => { e.preventDefault(); this._showError(); });
         this.wrapper.addEventListener('keydown', (e) => {
             if (!this.isOpen && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); this._toggle(true); return; }
             if (this.isOpen) {
@@ -215,44 +229,24 @@ class CountrySelect {
     }
 }
 
-/**
- * HTMX & MUTATION OBSERVER HARDENED LOGIC
- */
+/** AUTO-INIT LOGIC (HTMX & STATIC) **/
 const initCS = (target) => {
     const root = target || document;
     if (!root.querySelectorAll) return;
-
     root.querySelectorAll('.country-select').forEach(el => {
-        const next = el.nextSibling;
-        const hasWrapper = next && next.classList && next.classList.contains('cs-wrapper');
-        if (!hasWrapper) {
-            new CountrySelect(el);
-        }
+        const hasWrapper = el.nextSibling && el.nextSibling.classList && el.nextSibling.classList.contains('cs-wrapper');
+        if (!hasWrapper) new CountrySelect(el);
     });
 };
 
 const setupListeners = () => {
     initCS(document);
-    
-    const htmxEvents = ['htmx:afterProcess', 'htmx:afterOnLoad', 'htmx:afterSettle'];
-    htmxEvents.forEach(evt => {
-        document.body.addEventListener(evt, (e) => {
-            const target = e.detail.target || e.target;
-            initCS(target);
-        });
+    ['htmx:afterProcess', 'htmx:afterOnLoad', 'htmx:afterSettle'].forEach(evt => {
+        document.body.addEventListener(evt, (e) => initCS(e.detail.target || e.target));
     });
-
-    const observer = new MutationObserver((mutations) => {
-        for (let mutation of mutations) {
-            if (mutation.addedNodes.length) initCS(mutation.target);
-        }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    const obs = new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target)));
+    obs.observe(document.body, { childList: true, subtree: true });
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupListeners);
-} else {
-    setupListeners();
-}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupListeners);
+else setupListeners();
