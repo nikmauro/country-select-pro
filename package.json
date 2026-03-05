@@ -5,6 +5,7 @@
   "main": "dist/country-select.min.js",
   "jsdelivr": "dist/country-select.min.js",
   "unpkg": "dist/country-select.min.js",
+  "browser": "dist/country-select.min.js",
   "exports": {
     ".": "./dist/country-select.min.js"
   },
