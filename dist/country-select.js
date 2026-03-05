@@ -208,17 +208,17 @@ class CountrySelect {
     }
 }
 
-// --- v5.2 Safe Initialization & HTMX Support ---
+/**
+ * v5.3 - HTMX & Dynamic Content Hardened Logic
+ */
 const initCS = (target) => {
-    // Σιγουρευόμαστε ότι το target είναι έγκυρο Element
     const root = target || document;
     if (!root.querySelectorAll) return;
 
     root.querySelectorAll('.country-select').forEach(el => {
-        // Έλεγχος αν έχει ήδη wrapper δίπλα του
-        const hasWrapper = el.nextSibling && 
-                          el.nextSibling.classList && 
-                          el.nextSibling.classList.contains('cs-wrapper');
+        // Πιο αυστηρός έλεγχος για να μην διπλασιάζεται
+        const next = el.nextSibling;
+        const hasWrapper = next && next.classList && next.classList.contains('cs-wrapper');
         
         if (!hasWrapper) {
             new CountrySelect(el);
@@ -226,27 +226,38 @@ const initCS = (target) => {
     });
 };
 
-// Συνάρτηση που ξεκινάει τους Listeners
 const setupListeners = () => {
-    // 1. Αρχική ενεργοποίηση
+    // 1. Initial Load
     initCS(document);
 
-    // 2. HTMX Support (μόνο αν υπάρχει το body)
-    if (document.body) {
-        document.body.addEventListener('htmx:afterProcess', (e) => {
-            const target = e.detail.target;
-            if (target && target.nodeType === 1) {
-                initCS(target);
-            }
+    // 2. HTMX Listeners (Πολλαπλά events για σιγουριά)
+    const htmxEvents = ['htmx:afterProcess', 'htmx:afterOnLoad', 'htmx:afterSettle'];
+    htmxEvents.forEach(evtName => {
+        document.body.addEventListener(evtName, (e) => {
+            // Αν το HTMX επιστρέφει ολόκληρη φόρμα ή μόνο το inner content
+            const target = e.detail.target || e.target;
+            initCS(target);
         });
-    }
+    });
+
+    // 3. Mutation Observer - Η απόλυτη δικλείδα ασφαλείας
+    const observer = new MutationObserver((mutations) => {
+        for (let mutation of mutations) {
+            if (mutation.addedNodes.length) {
+                initCS(mutation.target);
+            }
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 };
 
-// Εκτέλεση ανάλογα με το πού βρίσκεται το script
+// Execution Trigger
 if (document.readyState === 'loading') {
-    // Αν είναι στο Header και ακόμα φορτώνει
     document.addEventListener('DOMContentLoaded', setupListeners);
 } else {
-    // Αν είναι στο Footer ή έχει ήδη φορτώσει το DOM
     setupListeners();
 }
