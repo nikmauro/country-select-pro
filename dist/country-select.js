@@ -1,40 +1,15 @@
 /**
- * CountrySelect Pro v4.8
- * (c) 2024 nikmauro
- * Released under the MIT License.
- * Repository: https://github.com/nikmauro/country-select-pro
+ * CountrySelect Pro v4.8.3
+ * Feature: Added Down Arrow icon via CSS.
  */
-
-
-/**
- * CountrySelect Pro v4.8
- * ---------------------------------------------------------------------------
- * EXAMPLES & DATA ATTRIBUTES:
- * * 1. Default (ISO Code): 
- * <input type="text" class="country-select" value="GR">
- * * 2. Phone Mode (Returns +30):
- * <input type="text" class="country-select" value="+30" data-value-type="phone">
- * * 3. Custom Schemas (List vs Trigger):
- * data-schema="{img} {name} (+{phone})"  -> Πώς φαίνεται στη λίστα
- * data-schema-return="{img} (+{phone})"  -> Πώς φαίνεται αφού επιλεγεί
- * * 4. UI Adjustments:
- * data-dropdown-width="300px" -> Σταθερό πλάτος μενού (αντί για auto/100%)
- * data-country-row-values="10" -> Πόσες γραμμές να φαίνονται πριν το scroll
- * data-country-search="false"  -> Απενεργοποίηση αναζήτησης
- * * 5. Validation:
- * Λειτουργεί αυτόματα με το 'required' attribute και το native validation του browser.
- * ---------------------------------------------------------------------------
- */
-
 class CountrySelect {
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
 
-        // Configuration από data-attributes
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
-        this.valueType = this.input.dataset.valueType || "code"; // code, phone, name
+        this.valueType = this.input.dataset.valueType || "code"; 
         this.rowLimit = parseInt(this.input.dataset.countryRowValues) || 5; 
         this.hasSearch = this.input.dataset.countrySearch !== "false";
         this.dropdownWidth = this.input.dataset.dropdownWidth || "auto"; 
@@ -64,28 +39,33 @@ class CountrySelect {
     _applyStyles() {
         const styles = `
             .cs-wrapper { position: relative; font-family: system-ui, sans-serif; outline: none; box-sizing: border-box; display: block; width: 100%; }
+            
             .cs-trigger { 
-                padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; 
+                padding: 10px 35px 10px 12px; border: 1px solid #ccc; border-radius: 6px; 
                 display: flex; align-items: center; gap: 10px; cursor: pointer; background: #fff; min-height: 42px; box-sizing: border-box;
                 transition: border-color 0.15s ease-in-out;
+                position: relative;
+                /* Down Arrow Icon (SVG) */
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                background-size: 16px;
             }
             
-            /* Validation UI */
-            .cs-wrapper.is-invalid .cs-trigger { border-color: #dc3545 !important; }
-            .cs-error-msg { 
-                display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10;
+            /* Bootstrap Group Fix: Remove arrow background if inside input-group-text */
+            .input-group-text .cs-trigger { 
+                background-position: right 0px center; 
+                padding-right: 25px;
             }
-            .cs-wrapper.is-invalid .cs-error-msg { display: block; }
 
-            /* Bootstrap Input Group Support */
-            .input-group-text .cs-wrapper .cs-trigger { border: none; background: transparent; padding: 0; min-height: auto; width: auto; }
+            .cs-wrapper.is-invalid .cs-trigger { border-color: #dc3545 !important; }
+            .cs-error-msg { display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10; }
+            .cs-wrapper.is-invalid .cs-error-msg { display: block; }
+            .input-group-text .cs-wrapper .cs-trigger { border: none; background-color: transparent; padding-top: 0; padding-bottom: 0; min-height: auto; width: auto; }
             .input-group-text .cs-wrapper { width: auto; }
             .input-group-text { padding: 0 12px !important; position: relative; }
-            .input-group-text:has(.cs-wrapper.is-invalid) { border-color: #dc3545; z-index: 5; }
-
             .cs-wrapper:focus .cs-trigger { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
             
-            /* Dropdown Menu */
             .cs-dropdown { 
                 position: absolute; top: calc(100% + 8px); left: 0; background: #fff; 
                 border: 1px solid #ccc; z-index: 2050; display: none; 
@@ -97,13 +77,11 @@ class CountrySelect {
             .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: smooth; min-height: 50px; }
             .cs-option { height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; box-sizing: border-box; color: #333; }
             .cs-option:hover, .cs-option.active { background: #f0f7ff; color: #0056b3; }
-            
-            /* Elements */
             .cs-wrapper img { width: 22px !important; height: 15px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
             .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v48-final-styles';
+        const styleId = 'cs-v49-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -113,18 +91,11 @@ class CountrySelect {
     }
 
     _setupDOM() {
-        // Κάνουμε το input 'αόρατο' αλλά λειτουργικό για το validation
-        Object.assign(this.input.style, {
-            position: 'absolute', opacity: '0', width: '1px', height: '1px', pointerEvents: 'none'
-        });
-
+        Object.assign(this.input.style, { position: 'absolute', opacity: '0', width: '1px', height: '1px', pointerEvents: 'none' });
         this.wrapper = document.createElement('div');
         this.wrapper.className = 'cs-wrapper';
         this.wrapper.tabIndex = 0; 
-        
-        // Αν υπάρχει value, δείχνουμε κενό μέχρι να έρθει το API (αποφυγή flash "...")
         const initialText = this.input.value ? "" : this.config.placeholder;
-
         this.wrapper.innerHTML = `
             <div class="cs-trigger"><span class="cs-selected-content">${initialText}</span></div>
             <div class="cs-error-msg"></div>
@@ -135,13 +106,9 @@ class CountrySelect {
                 <div class="cs-list"><div class="cs-loading" style="padding:15px; text-align:center;">Loading...</div></div>
             </div>
         `;
-        
         const dropdown = this.wrapper.querySelector('.cs-dropdown');
         dropdown.style.width = (this.dropdownWidth === 'auto') ? '100%' : this.dropdownWidth;
-        
         this.input.parentNode.insertBefore(this.wrapper, this.input.nextSibling);
-
-        // Server-side error check
         if (this.input.classList.contains('is-invalid')) this._showError();
     }
 
@@ -155,7 +122,6 @@ class CountrySelect {
                 flag: c.flags.svg,
                 phone: c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "")
             })).sort((a, b) => a.name.localeCompare(b.name));
-            
             this.filteredCountries = [...this.countries];
             this._renderOptions();
             this._syncInitialValue();
@@ -164,24 +130,14 @@ class CountrySelect {
 
     _syncInitialValue() {
         const val = this.input.value;
-        if (!val) {
-            this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder;
-            return;
-        }
-        const current = this.countries.find(c => 
-            this.valueType === "phone" ? c.phone === val : 
-            this.valueType === "name" ? c.name === val : c.code === val
-        );
+        if (!val) { this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder; return; }
+        const current = this.countries.find(c => this.valueType === "phone" ? c.phone === val : this.valueType === "name" ? c.name === val : c.code === val);
         if (current) this._updateUI(current);
         else this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder;
     }
 
     _parseTemplate(template, country) {
-        return template
-            .replace('{img}', `<img src="${country.flag}">`)
-            .replace('{name}', `<span>${country.name}</span>`)
-            .replace('{code}', `<span>${country.code}</span>`)
-            .replace('{phone}', `<span>${country.phone}</span>`);
+        return template.replace('{img}', `<img src="${country.flag}">`).replace('{name}', `<span>${country.name}</span>`).replace('{code}', `<span>${country.code}</span>`).replace('{phone}', `<span>${country.phone}</span>`);
     }
 
     _renderOptions() {
@@ -199,8 +155,7 @@ class CountrySelect {
 
     _select(country) {
         this._updateUI(country);
-        const val = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
-        this.input.value = val;
+        this.input.value = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
         this.input.setCustomValidity("");
         this.wrapper.classList.remove('is-invalid');
         this.input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -237,24 +192,15 @@ class CountrySelect {
     _bindEvents() {
         this.wrapper.querySelector('.cs-trigger').onclick = (e) => { e.stopPropagation(); this._toggle(); };
         this.input.addEventListener('invalid', (e) => { e.preventDefault(); this._showError(); });
-        
         this.wrapper.addEventListener('keydown', (e) => {
             if (!this.isOpen && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); this._toggle(true); return; }
             if (this.isOpen) {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    this.activeIndex = Math.min(this.activeIndex + 1, this.filteredCountries.length - 1);
-                    this._renderOptions(); this._scrollToActive();
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.activeIndex = Math.max(this.activeIndex - 1, 0);
-                    this._renderOptions(); this._scrollToActive();
-                } else if (e.key === 'Enter' && this.activeIndex > -1) {
-                    e.preventDefault(); this._select(this.filteredCountries[this.activeIndex]);
-                } else if (e.key === 'Escape') this._toggle(false);
+                if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex = Math.min(this.activeIndex + 1, this.filteredCountries.length - 1); this._renderOptions(); this._scrollToActive(); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex = Math.max(this.activeIndex - 1, 0); this._renderOptions(); this._scrollToActive(); }
+                else if (e.key === 'Enter' && this.activeIndex > -1) { e.preventDefault(); this._select(this.filteredCountries[this.activeIndex]); }
+                else if (e.key === 'Escape') this._toggle(false);
             }
         });
-
         if (this.hasSearch) {
             this.wrapper.querySelector('.cs-search-input').oninput = (e) => {
                 const term = e.target.value.toLowerCase();
@@ -273,5 +219,4 @@ class CountrySelect {
     }
 }
 
-// Auto-run
 document.querySelectorAll('.country-select').forEach(el => new CountrySelect(el));
