@@ -1,28 +1,29 @@
 {
-	"name": "ccountry-select-pro",
-	"version": "4.8.2",
-	"description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
-	"main": "dist/country-select.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/nikmauro/country-select-pro.git"
-	},
-	"keywords": [
-		"country",
-		"international",
-	    "vanilla",
-	   "country",
- 	   "dropdown",
-       "flags",
-   	   "select"
-	],
-	"scripts": {
-		"build": "gulp build"
-	},
-	"author": "Nikolaos Mavroidis",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/nikmauro/country-select-pro/issues"
-	},
-	"homepage": "https://github.com/nikmauro/country-select-pro"
+  "name": "country-select-pro",
+  "version": "4.8.2",
+  "description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
+  "main": "dist/country-select.min.js",
+  "jsdelivr": "dist/country-select.min.js",
+  "unpkg": "dist/country-select.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikmauro/country-select-pro.git"
+  },
+  "keywords": [
+    "country",
+    "dropdown",
+    "flags",
+    "select",
+    "international",
+    "vanilla-js"
+  ],
+  "scripts": {
+    "build": "gulp build"
+  },
+  "author": "Nikolaos Mavroidis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nikmauro/country-select-pro/issues"
+  },
+  "homepage": "https://github.com/nikmauro/country-select-pro"
 }
