@@ -208,17 +208,31 @@ class CountrySelect {
     }
 }
 
-// Initialization Logic
-const initCS = (container = document) => {
-    container.querySelectorAll('.country-select').forEach(el => {
-        if (!el.nextSibling || !el.nextSibling.classList.contains('cs-wrapper')) {
+// --- Διορθωμένο Initialization Logic ---
+const initCS = (target) => {
+    // Σιγουρευόμαστε ότι το target υπάρχει και είναι Element
+    if (!target || !target.querySelectorAll) return;
+
+    target.querySelectorAll('.country-select').forEach(el => {
+        if (!el.nextSibling || (el.nextSibling.classList && !el.nextSibling.classList.contains('cs-wrapper'))) {
             new CountrySelect(el);
+        } else if (!el.nextSibling) {
+             new CountrySelect(el);
         }
     });
 };
 
-// Start
-initCS();
+// 1. Αρχικό load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => initCS(document));
+} else {
+    initCS(document);
+}
 
-// HTMX Support
-document.body.addEventListener('htmx:afterProcess', (e) => initCS(e.detail.target));
+// 2. HTMX Support - Διορθωμένο για να μην πετάει σφάλμα contains
+document.body.addEventListener('htmx:afterProcess', (e) => {
+    const target = e.detail.target;
+    if (target && target.nodeType === 1) { // 1 = Element Node
+        initCS(target);
+    }
+});
