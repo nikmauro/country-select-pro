@@ -1,12 +1,20 @@
 /**
  * CountrySelect Pro v4.8.3
- * Feature: Added Down Arrow icon via CSS.
+ * ---------------------------------------------------------------------------
+ * Features: 
+ * - SVG Arrow Down icon
+ * - HTMX Auto-initialization
+ * - Improved Validation UI
+ * - Zero Dependencies
+ * ---------------------------------------------------------------------------
  */
+
 class CountrySelect {
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
 
+        // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
         this.valueType = this.input.dataset.valueType || "code"; 
@@ -39,38 +47,19 @@ class CountrySelect {
     _applyStyles() {
         const styles = `
             .cs-wrapper { position: relative; font-family: system-ui, sans-serif; outline: none; box-sizing: border-box; display: block; width: 100%; }
-            
             .cs-trigger { 
                 padding: 10px 35px 10px 12px; border: 1px solid #ccc; border-radius: 6px; 
                 display: flex; align-items: center; gap: 10px; cursor: pointer; background: #fff; min-height: 42px; box-sizing: border-box;
-                transition: border-color 0.15s ease-in-out;
-                position: relative;
-                /* Down Arrow Icon (SVG) */
+                transition: border-color 0.15s ease-in-out; position: relative;
                 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 10px center;
-                background-size: 16px;
+                background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
             }
-            
-            /* Bootstrap Group Fix: Remove arrow background if inside input-group-text */
-            .input-group-text .cs-trigger { 
-                background-position: right 0px center; 
-                padding-right: 25px;
-            }
-
+            .input-group-text .cs-trigger { background-position: right 0px center; padding-right: 25px; border: none; background-color: transparent; min-height: auto; }
             .cs-wrapper.is-invalid .cs-trigger { border-color: #dc3545 !important; }
             .cs-error-msg { display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10; }
             .cs-wrapper.is-invalid .cs-error-msg { display: block; }
-            .input-group-text .cs-wrapper .cs-trigger { border: none; background-color: transparent; padding-top: 0; padding-bottom: 0; min-height: auto; width: auto; }
-            .input-group-text .cs-wrapper { width: auto; }
-            .input-group-text { padding: 0 12px !important; position: relative; }
             .cs-wrapper:focus .cs-trigger { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
-            
-            .cs-dropdown { 
-                position: absolute; top: calc(100% + 8px); left: 0; background: #fff; 
-                border: 1px solid #ccc; z-index: 2050; display: none; 
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; max-width: 95vw;
-            }
+            .cs-dropdown { position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #ccc; z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; max-width: 95vw; }
             .cs-wrapper.open .cs-dropdown { display: block; }
             .cs-search-box { padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; }
             .cs-search-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline: none; }
@@ -81,7 +70,7 @@ class CountrySelect {
             .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v49-styles';
+        const styleId = 'cs-v5-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -219,4 +208,17 @@ class CountrySelect {
     }
 }
 
-document.querySelectorAll('.country-select').forEach(el => new CountrySelect(el));
+// Initialization Logic
+const initCS = (container = document) => {
+    container.querySelectorAll('.country-select').forEach(el => {
+        if (!el.nextSibling || !el.nextSibling.classList.contains('cs-wrapper')) {
+            new CountrySelect(el);
+        }
+    });
+};
+
+// Start
+initCS();
+
+// HTMX Support
+document.body.addEventListener('htmx:afterProcess', (e) => initCS(e.detail.target));
