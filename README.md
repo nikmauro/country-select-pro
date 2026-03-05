@@ -25,4 +25,4 @@ Just include the JS file from jsDelivr: https://cdn.jsdelivr.net/gh/nikmauro/cou
 
 ## Authors
 
-Developed by nikmauro with the collaborative assistance of Gemini (Google AI).
+Developed by nikmauro with the collaborative assistance of Gemini (Google AI). 
