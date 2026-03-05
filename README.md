@@ -23,4 +23,6 @@ https://nikmauro.github.io/country-select-pro/
 
 Just include the JS file from jsDelivr: https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro/country-select.min.js
 
+## Authors
+
 Developed by nikmauro with the collaborative assistance of Gemini (Google AI).
