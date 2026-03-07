@@ -1,6 +1,6 @@
 {
   "name": "country-select-pro",
-  "version": "4.9.1",
+  "version": "5.6.0",
   "description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
   "main": "dist/country-select.js",
   "jsdelivr": "dist/country-select.js",
