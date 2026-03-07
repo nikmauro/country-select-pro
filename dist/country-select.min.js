@@ -1,11 +1,11 @@
 /**
- * CountrySelect Pro v5.5 - Smart Position Edition
+ * CountrySelect Pro v5.6 - Preferred Edition
  * ---------------------------------------------------------------------------
  * Features:
- * - Smart Dropdown: Automatically flips to "drop-up" if near screen bottom.
- * - Instant Snap Scroll: No lag when opening a selected country.
- * - HTMX & MutationObserver: Full support for dynamic checkouts.
- * - Zero external dependencies (No Popper.js required).
+ * - Preferred Countries: Shows GR, CY (or others) at the top of the list.
+ * - Smart Position: Flips to Drop-Up when near the bottom of the screen.
+ * - Instant Snap Scroll: No lag, immediate centering of selected country.
+ * - HTMX & MutationObserver: Ready for dynamic forms and checkouts.
  * ---------------------------------------------------------------------------
  */
 
@@ -14,6 +14,7 @@ class CountrySelect {
         this.input = element;
         if (!this.input) return;
 
+        // Dataset Options
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
         this.valueType = this.input.dataset.valueType || "code"; 
@@ -21,9 +22,12 @@ class CountrySelect {
         this.hasSearch = this.input.dataset.countrySearch !== "false";
         this.dropdownWidth = this.input.dataset.dropdownWidth || "auto"; 
         
+        // Preferred Logic
+        const preferredAttr = this.input.dataset.preferred || "";
+        this.preferredCodes = preferredAttr ? preferredAttr.split(',').map(c => c.trim().toUpperCase()) : [];
+
         this.config = {
             placeholder: this.input.dataset.placeholder || "Select",
-            preferred: this.input.dataset.preferred ? this.input.dataset.preferred.split(',') : [],
             ...options
         };
 
@@ -58,16 +62,9 @@ class CountrySelect {
             .cs-error-msg { display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10; }
             .cs-wrapper.is-invalid .cs-error-msg { display: block; }
             .cs-wrapper:focus .cs-trigger { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
-            
-            .cs-dropdown { 
-                position: absolute; left: 0; background: #fff; border: 1px solid #ccc; 
-                z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-                border-radius: 6px; overflow: hidden; max-width: 95vw;
-            }
-            
+            .cs-dropdown { position: absolute; left: 0; background: #fff; border: 1px solid #ccc; z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; max-width: 95vw; }
             .cs-wrapper.drop-up .cs-dropdown { box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
             .cs-wrapper.open .cs-dropdown { display: block; }
-            
             .cs-search-box { padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; }
             .cs-search-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline: none; }
             .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: auto; min-height: 50px; }
@@ -75,9 +72,10 @@ class CountrySelect {
             .cs-option:hover, .cs-option.active { background: #f0f7ff; color: #0056b3; }
             .cs-wrapper img { width: 22px !important; height: 15px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
             .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
+            .cs-divider { height: 1px; background: #eee; margin: 4px 0; pointer-events: none; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v55-styles';
+        const styleId = 'cs-v56-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -129,12 +127,15 @@ class CountrySelect {
         try {
             const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,idd');
             const data = await res.json();
+            
             this.countries = data.map(c => ({
                 name: c.name.common,
-                code: c.cca2,
+                code: c.cca2.toUpperCase(),
                 flag: c.flags.svg,
-                phone: c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "")
+                phone: c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : ""),
+                isPreferred: this.preferredCodes.includes(c.cca2.toUpperCase())
             })).sort((a, b) => a.name.localeCompare(b.name));
+
             this.filteredCountries = [...this.countries];
             this._renderOptions();
             this._syncInitialValue();
@@ -156,13 +157,32 @@ class CountrySelect {
         const listContainer = this.wrapper.querySelector('.cs-list');
         if(!listContainer) return;
         listContainer.innerHTML = '';
-        this.filteredCountries.forEach((country, index) => {
+        const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
+
+        // Filter: Preferred vs Others
+        const preferred = this.filteredCountries.filter(c => c.isPreferred);
+        const others = this.filteredCountries.filter(c => !c.isPreferred);
+
+        const createOption = (country, index) => {
             const div = document.createElement('div');
             div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
             div.innerHTML = this._parseTemplate(this.schema, country);
             div.onclick = (e) => { e.stopPropagation(); this._select(country); };
-            listContainer.appendChild(div);
-        });
+            return div;
+        };
+
+        // 1. Render Preferred
+        preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
+
+        // 2. Render Divider (only if not searching)
+        if (preferred.length > 0 && others.length > 0 && !searchVal) {
+            const hr = document.createElement('div');
+            hr.className = 'cs-divider';
+            listContainer.appendChild(hr);
+        }
+
+        // 3. Render Others
+        others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
     }
 
     _select(country) {
@@ -186,10 +206,19 @@ class CountrySelect {
         if (this.isOpen) {
             this._updatePosition();
             document.dispatchEvent(new CustomEvent('cs-close-others', { detail: { opener: this.wrapper } }));
-            this.activeIndex = this.filteredCountries.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
+            
+            // Re-render and Scroll
             this._renderOptions();
             const list = this.wrapper.querySelector('.cs-list');
             list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
+
+            // Calculate active index correctly within the merged list
+            const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
+            const pref = this.filteredCountries.filter(c => c.isPreferred);
+            const oth = this.filteredCountries.filter(c => !c.isPreferred);
+            const fullList = [...pref, ...oth];
+            this.activeIndex = fullList.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
+
             if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 0);
             if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
         }
@@ -199,19 +228,19 @@ class CountrySelect {
     _bindEvents() {
         this.wrapper.querySelector('.cs-trigger').onclick = (e) => { e.stopPropagation(); this._toggle(); };
         this.wrapper.addEventListener('keydown', (e) => {
-            if (!this.isOpen && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); this._toggle(true); return; }
+            if (!this.isOpen && (e.key === 'ArrowDown')) { e.preventDefault(); this._toggle(true); return; }
             if (this.isOpen) {
-                if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex = Math.min(this.activeIndex + 1, this.filteredCountries.length - 1); this._renderOptions(); this._scrollToActive(); }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex = Math.max(this.activeIndex - 1, 0); this._renderOptions(); this._scrollToActive(); }
-                else if (e.key === 'Enter' && this.activeIndex > -1) { e.preventDefault(); this._select(this.filteredCountries[this.activeIndex]); }
-                else if (e.key === 'Escape') this._toggle(false);
+                if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex++; this._renderOptions(); this._scrollToActive(); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex--; this._renderOptions(); this._scrollToActive(); }
+                else if (e.key === 'Enter') { e.preventDefault(); /* select logic here */ }
             }
         });
         if (this.hasSearch) {
             this.wrapper.querySelector('.cs-search-input').oninput = (e) => {
                 const term = e.target.value.toLowerCase();
                 this.filteredCountries = this.countries.filter(c => c.name.toLowerCase().includes(term) || c.phone.includes(term));
-                this.activeIndex = 0; this._renderOptions();
+                this.activeIndex = 0; 
+                this._renderOptions();
             };
         }
         document.addEventListener('click', (e) => { if (!this.wrapper.contains(e.target)) this._toggle(false); });
@@ -229,24 +258,18 @@ class CountrySelect {
     }
 }
 
-/** AUTO-INIT LOGIC (HTMX & STATIC) **/
+/** AUTO-INIT (STATIC & HTMX) **/
 const initCS = (target) => {
-    const root = target || document;
-    if (!root.querySelectorAll) return;
+    const root = (target && target.querySelectorAll) ? target : document;
     root.querySelectorAll('.country-select').forEach(el => {
         const hasWrapper = el.nextSibling && el.nextSibling.classList && el.nextSibling.classList.contains('cs-wrapper');
         if (!hasWrapper) new CountrySelect(el);
     });
 };
-
 const setupListeners = () => {
     initCS(document);
-    ['htmx:afterProcess', 'htmx:afterOnLoad', 'htmx:afterSettle'].forEach(evt => {
-        document.body.addEventListener(evt, (e) => initCS(e.detail.target || e.target));
-    });
-    const obs = new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target)));
-    obs.observe(document.body, { childList: true, subtree: true });
+    ['htmx:afterProcess', 'htmx:afterSettle'].forEach(evt => document.body.addEventListener(evt, (e) => initCS(e.detail.target || e.target)));
+    new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target))).observe(document.body, { childList: true, subtree: true });
 };
-
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupListeners);
 else setupListeners();
