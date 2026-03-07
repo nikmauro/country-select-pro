@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.7
+ * CountrySelect Pro v5.6.1
  * ---------------------------------------------------------------------------
  * Features: 
  * - SVG Arrow Down icon
