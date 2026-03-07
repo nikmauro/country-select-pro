@@ -230,10 +230,21 @@ class CountrySelect {
 
     _select(country) {
         this._updateUI(country);
+
+        // Ενημέρωση τιμής
         this.input.value = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
+
+        // Reset validation
         this.input.setCustomValidity("");
         this.wrapper.classList.remove('is-invalid');
-        this.input.dispatchEvent(new Event('change', {bubbles: true}));
+
+        // --- ΤΟ ΚΛΕΙΔΙ ΓΙΑ ΤΟ HTMX ---
+        // 1. Στέλνουμε 'change' (για hx-trigger="change")
+        this.input.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // 2. Στέλνουμε 'input' (για hx-trigger="input" ή generic listeners)
+        this.input.dispatchEvent(new Event('input', { bubbles: true }));
+
         this._toggle(false);
         this.wrapper.focus();
     }
