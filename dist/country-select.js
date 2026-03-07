@@ -1,7 +1,7 @@
 /**
  * CountrySelect Pro v5.6.1
  * ---------------------------------------------------------------------------
- * Features: 
+ * Features:
  * - SVG Arrow Down icon
  * - HTMX Auto-initialization
  * - Improved Validation UI
@@ -17,11 +17,11 @@ class CountrySelect {
         // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
-        this.valueType = this.input.dataset.valueType || "code"; 
-        this.rowLimit = parseInt(this.input.dataset.countryRowValues) || 5; 
+        this.valueType = this.input.dataset.valueType || "code";
+        this.rowLimit = parseInt(this.input.dataset.countryRowValues) || 5;
         this.hasSearch = this.input.dataset.countrySearch !== "false";
-        this.dropdownWidth = this.input.dataset.dropdownWidth || "auto"; 
-        
+        this.dropdownWidth = this.input.dataset.dropdownWidth || "auto";
+
         // Preferred Logic
         const preferredAttr = this.input.dataset.preferred || "";
         this.preferredCodes = preferredAttr ? preferredAttr.split(',').map(c => c.trim().toUpperCase()) : [];
@@ -35,8 +35,8 @@ class CountrySelect {
         this.filteredCountries = [];
         this.isOpen = false;
         this.activeIndex = -1;
-        this.rowHeight = 44; 
-        
+        this.rowHeight = 44;
+
         this._init();
     }
 
@@ -123,10 +123,16 @@ class CountrySelect {
     }
 
     _setupDOM() {
-        Object.assign(this.input.style, { position: 'absolute', opacity: '0', width: '1px', height: '1px', pointerEvents: 'none' });
+        Object.assign(this.input.style, {
+            position: 'absolute',
+            opacity: '0',
+            width: '1px',
+            height: '1px',
+            pointerEvents: 'none'
+        });
         this.wrapper = document.createElement('div');
         this.wrapper.className = 'cs-wrapper';
-        this.wrapper.tabIndex = 0; 
+        this.wrapper.tabIndex = 0;
         const initialText = this.input.value ? "" : this.config.placeholder;
         this.wrapper.innerHTML = `
             <div class="cs-trigger"><span class="cs-selected-content">${initialText}</span></div>
@@ -160,7 +166,7 @@ class CountrySelect {
         try {
             const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,idd');
             const data = await res.json();
-            
+
             this.countries = data.map(c => ({
                 name: c.name.common,
                 code: c.cca2.toUpperCase(),
@@ -172,12 +178,17 @@ class CountrySelect {
             this.filteredCountries = [...this.countries];
             this._renderOptions();
             this._syncInitialValue();
-        } catch (e) { console.error("CountrySelect API Fail", e); }
+        } catch (e) {
+            console.error("CountrySelect API Fail", e);
+        }
     }
 
     _syncInitialValue() {
         const val = this.input.value;
-        if (!val) { this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder; return; }
+        if (!val) {
+            this.wrapper.querySelector('.cs-selected-content').innerHTML = this.config.placeholder;
+            return;
+        }
         const current = this.countries.find(c => this.valueType === "phone" ? c.phone === val : this.valueType === "name" ? c.name === val : c.code === val);
         if (current) this._updateUI(current);
     }
@@ -188,7 +199,7 @@ class CountrySelect {
 
     _renderOptions() {
         const listContainer = this.wrapper.querySelector('.cs-list');
-        if(!listContainer) return;
+        if (!listContainer) return;
         listContainer.innerHTML = '';
         const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
 
@@ -199,7 +210,10 @@ class CountrySelect {
             const div = document.createElement('div');
             div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
             div.innerHTML = this._parseTemplate(this.schema, country);
-            div.onclick = (e) => { e.stopPropagation(); this._select(country); };
+            div.onclick = (e) => {
+                e.stopPropagation();
+                this._select(country);
+            };
             return div;
         };
 
@@ -219,23 +233,23 @@ class CountrySelect {
         this.input.value = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
         this.input.setCustomValidity("");
         this.wrapper.classList.remove('is-invalid');
-        this.input.dispatchEvent(new Event('change', { bubbles: true }));
+        this.input.dispatchEvent(new Event('change', {bubbles: true}));
         this._toggle(false);
-        this.wrapper.focus(); 
+        this.wrapper.focus();
     }
 
     _updateUI(country) {
         const content = this.wrapper.querySelector('.cs-selected-content');
-        if(content) content.innerHTML = this._parseTemplate(this.schemaReturn, country);
+        if (content) content.innerHTML = this._parseTemplate(this.schemaReturn, country);
     }
 
     _toggle(force) {
-        if (this.countries.length === 0) return; 
+        if (this.countries.length === 0) return;
         this.isOpen = force !== undefined ? force : !this.isOpen;
         if (this.isOpen) {
             this._updatePosition();
-            document.dispatchEvent(new CustomEvent('cs-close-others', { detail: { opener: this.wrapper } }));
-            
+            document.dispatchEvent(new CustomEvent('cs-close-others', {detail: {opener: this.wrapper}}));
+
             this._renderOptions();
             const list = this.wrapper.querySelector('.cs-list');
             list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
@@ -252,25 +266,47 @@ class CountrySelect {
     }
 
     _bindEvents() {
-        this.wrapper.querySelector('.cs-trigger').onclick = (e) => { e.stopPropagation(); this._toggle(); };
+        this.wrapper.querySelector('.cs-trigger').onclick = (e) => {
+            e.stopPropagation();
+            this._toggle();
+        };
         this.wrapper.addEventListener('keydown', (e) => {
-            if (!this.isOpen && (e.key === 'ArrowDown')) { e.preventDefault(); this._toggle(true); return; }
+            if (!this.isOpen && (e.key === 'ArrowDown')) {
+                e.preventDefault();
+                this._toggle(true);
+                return;
+            }
             if (this.isOpen) {
-                if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex++; this._renderOptions(); this._scrollToActive(); }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex--; this._renderOptions(); this._scrollToActive(); }
-                else if (e.key === 'Escape') this._toggle(false);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.activeIndex++;
+                    this._renderOptions();
+                    this._scrollToActive();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.activeIndex--;
+                    this._renderOptions();
+                    this._scrollToActive();
+                } else if (e.key === 'Escape') this._toggle(false);
             }
         });
         if (this.hasSearch) {
             this.wrapper.querySelector('.cs-search-input').oninput = (e) => {
                 const term = e.target.value.toLowerCase();
                 this.filteredCountries = this.countries.filter(c => c.name.toLowerCase().includes(term) || c.phone.includes(term));
-                this.activeIndex = 0; 
+                this.activeIndex = 0;
                 this._renderOptions();
             };
         }
-        document.addEventListener('click', (e) => { if (!this.wrapper.contains(e.target)) this._toggle(false); });
-        document.addEventListener('cs-close-others', (e) => { if (e.detail.opener !== this.wrapper) { this.isOpen = false; this.wrapper.classList.remove('open'); } });
+        document.addEventListener('click', (e) => {
+            if (!this.wrapper.contains(e.target)) this._toggle(false);
+        });
+        document.addEventListener('cs-close-others', (e) => {
+            if (e.detail.opener !== this.wrapper) {
+                this.isOpen = false;
+                this.wrapper.classList.remove('open');
+            }
+        });
     }
 
     _scrollToActive() {
@@ -295,7 +331,10 @@ const initCS = (target) => {
 const setupListeners = () => {
     initCS(document);
     ['htmx:afterProcess', 'htmx:afterSettle'].forEach(evt => document.body.addEventListener(evt, (e) => initCS(e.detail.target || e.target)));
-    new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target))).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target))).observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupListeners);
 else setupListeners();
