@@ -2,12 +2,12 @@
   "name": "country-select-pro",
   "version": "4.9.0",
   "description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
-  "main": "dist/country-select.min.js",
-  "jsdelivr": "dist/country-select.min.js",
-  "unpkg": "dist/country-select.min.js",
-  "browser": "dist/country-select.min.js",
+  "main": "dist/country-select.js",
+  "jsdelivr": "dist/country-select.js",
+  "unpkg": "dist/country-select.js",
+  "browser": "dist/country-select.js",
   "exports": {
-    ".": "./dist/country-select.min.js"
+    ".": "./dist/country-select.js"
   },
   "files": [
     "dist"
