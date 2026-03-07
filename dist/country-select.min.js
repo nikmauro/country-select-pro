@@ -1,11 +1,11 @@
 /**
- * CountrySelect Pro v5.6 - Preferred Edition
+ * CountrySelect Pro v5.7
  * ---------------------------------------------------------------------------
- * Features:
- * - Preferred Countries: Shows GR, CY (or others) at the top of the list.
- * - Smart Position: Flips to Drop-Up when near the bottom of the screen.
- * - Instant Snap Scroll: No lag, immediate centering of selected country.
- * - HTMX & MutationObserver: Ready for dynamic forms and checkouts.
+ * Features: 
+ * - SVG Arrow Down icon
+ * - HTMX Auto-initialization
+ * - Improved Validation UI
+ * - Zero Dependencies
  * ---------------------------------------------------------------------------
  */
 
@@ -14,7 +14,7 @@ class CountrySelect {
         this.input = element;
         if (!this.input) return;
 
-        // Dataset Options
+        // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
         this.schemaReturn = this.input.dataset.schemaReturn || this.schema;
         this.valueType = this.input.dataset.valueType || "code"; 
@@ -49,33 +49,71 @@ class CountrySelect {
 
     _applyStyles() {
         const styles = `
-            .cs-wrapper { position: relative; font-family: system-ui, sans-serif; outline: none; box-sizing: border-box; display: block; width: 100%; }
+            .cs-wrapper { position: relative; font-family: inherit; width: 100%; outline: none; }
             .cs-trigger { 
-                padding: 10px 35px 10px 12px; border: 1px solid #ccc; border-radius: 6px; 
-                display: flex; align-items: center; gap: 10px; cursor: pointer; background: #fff; min-height: 42px; box-sizing: border-box;
-                transition: border-color 0.15s ease-in-out; position: relative;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-                background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
+                /* Bootstrap 5 Exact Specs */
+                padding: 0.375rem 2.25rem 0.375rem 0.75rem; 
+                font-size: 1rem;
+                font-weight: 400;
+                line-height: 1.5;
+                color: #212529;
+                background-color: #fff;
+                background-clip: padding-box;
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+                transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+                display: flex; align-items: center; gap: 8px; cursor: pointer; 
+                min-height: calc(1.5em + 0.75rem + 2px); 
+                box-sizing: border-box; position: relative;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+                background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 16px 12px;
             }
-            .input-group-text .cs-trigger { background-position: right 0px center; padding-right: 25px; border: none; background-color: transparent; min-height: auto; }
+            
+            .input-group > .cs-wrapper { flex: 1 1 auto; width: 1%; }
             .cs-wrapper.is-invalid .cs-trigger { border-color: #dc3545 !important; }
             .cs-error-msg { display: none; color: #dc3545; font-size: 0.825em; margin-top: 4px; position: absolute; left: 0; top: 100%; width: 100%; z-index: 10; }
             .cs-wrapper.is-invalid .cs-error-msg { display: block; }
-            .cs-wrapper:focus .cs-trigger { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
-            .cs-dropdown { position: absolute; left: 0; background: #fff; border: 1px solid #ccc; z-index: 2050; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; max-width: 95vw; }
-            .cs-wrapper.drop-up .cs-dropdown { box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
+
+            /* Focus state Bootstrap 5 */
+            .cs-wrapper:focus-within .cs-trigger {
+                border-color: #86b7fe;
+                outline: 0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+            .cs-dropdown { 
+                position: absolute; left: 0; right: 0; background: #fff; 
+                border: 1px solid rgba(0,0,0,.15); border-radius: 0.375rem;
+                z-index: 2050; display: none; margin-top: 0.125rem;
+                box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+                overflow: hidden; max-width: 95vw;
+            }
+            
+            .cs-wrapper.drop-up .cs-dropdown { 
+                bottom: calc(100% + 0.25rem); top: auto;
+                box-shadow: 0 -0.5rem 1rem rgba(0,0,0,.175);
+            }
             .cs-wrapper.open .cs-dropdown { display: block; }
-            .cs-search-box { padding: 8px; border-bottom: 1px solid #eee; background: #f9f9f9; }
-            .cs-search-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; outline: none; }
-            .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: auto; min-height: 50px; }
-            .cs-option { height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; box-sizing: border-box; color: #333; }
-            .cs-option:hover, .cs-option.active { background: #f0f7ff; color: #0056b3; }
-            .cs-wrapper img { width: 22px !important; height: 15px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
-            .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; min-width: 20px; font-size: 14px; }
-            .cs-divider { height: 1px; background: #eee; margin: 4px 0; pointer-events: none; }
+            
+            .cs-search-box { padding: 8px; border-bottom: 1px solid #dee2e6; background: #f8f9fa; }
+            .cs-search-input { 
+                width: 100%; padding: 0.375rem 0.75rem; border: 1px solid #ced4da; 
+                border-radius: 0.25rem; outline: none; font-size: 0.875rem;
+            }
+            .cs-list { overflow-y: auto; scrollbar-width: thin; scroll-behavior: auto; min-height: 50px; padding: 0.375rem 0; }
+            .cs-option { 
+                padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 10px; 
+                cursor: pointer; font-size: 0.9rem; transition: background 0.1s;
+            }
+            .cs-option:hover { background-color: #f8f9fa; }
+            .cs-option.active { background-color: #0d6efd; color: #fff; }
+            
+            .cs-wrapper img { width: 20px !important; height: 14px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+            .cs-selected-content { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; line-height: 1; }
+            .cs-divider { height: 1px; background: #dee2e6; margin: 0.375rem 0; pointer-events: none; }
             .cs-hidden { display: none !important; }
         `;
-        const styleId = 'cs-v56-styles';
+        const styleId = 'cs-v57-styles';
         if (!document.getElementById(styleId)) {
             const style = document.createElement("style");
             style.id = styleId;
@@ -106,20 +144,15 @@ class CountrySelect {
     }
 
     _updatePosition() {
-        const dropdown = this.wrapper.querySelector('.cs-dropdown');
         const rect = this.wrapper.getBoundingClientRect();
-        const dropdownHeight = (this.rowLimit * this.rowHeight) + (this.hasSearch ? 50 : 0);
+        const dropdownHeight = (this.rowLimit * this.rowHeight) + (this.hasSearch ? 60 : 0);
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
 
         if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
             this.wrapper.classList.add('drop-up');
-            dropdown.style.bottom = 'calc(100% + 8px)';
-            dropdown.style.top = 'auto';
         } else {
             this.wrapper.classList.remove('drop-up');
-            dropdown.style.top = 'calc(100% + 8px)';
-            dropdown.style.bottom = 'auto';
         }
     }
 
@@ -159,7 +192,6 @@ class CountrySelect {
         listContainer.innerHTML = '';
         const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
 
-        // Filter: Preferred vs Others
         const preferred = this.filteredCountries.filter(c => c.isPreferred);
         const others = this.filteredCountries.filter(c => !c.isPreferred);
 
@@ -171,17 +203,14 @@ class CountrySelect {
             return div;
         };
 
-        // 1. Render Preferred
         preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
 
-        // 2. Render Divider (only if not searching)
         if (preferred.length > 0 && others.length > 0 && !searchVal) {
             const hr = document.createElement('div');
             hr.className = 'cs-divider';
             listContainer.appendChild(hr);
         }
 
-        // 3. Render Others
         others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
     }
 
@@ -207,13 +236,10 @@ class CountrySelect {
             this._updatePosition();
             document.dispatchEvent(new CustomEvent('cs-close-others', { detail: { opener: this.wrapper } }));
             
-            // Re-render and Scroll
             this._renderOptions();
             const list = this.wrapper.querySelector('.cs-list');
             list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
 
-            // Calculate active index correctly within the merged list
-            const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
             const pref = this.filteredCountries.filter(c => c.isPreferred);
             const oth = this.filteredCountries.filter(c => !c.isPreferred);
             const fullList = [...pref, ...oth];
@@ -232,7 +258,7 @@ class CountrySelect {
             if (this.isOpen) {
                 if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex++; this._renderOptions(); this._scrollToActive(); }
                 else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex--; this._renderOptions(); this._scrollToActive(); }
-                else if (e.key === 'Enter') { e.preventDefault(); /* select logic here */ }
+                else if (e.key === 'Escape') this._toggle(false);
             }
         });
         if (this.hasSearch) {
