@@ -230,19 +230,10 @@ class CountrySelect {
 
     _select(country) {
         this._updateUI(country);
-        this.input.value = (this.valueType === "phone") ? country.phone : country.code;
-
-        // --- HTMX & NATIVE EVENT FIX ---
-        // Δημιουργούμε ένα native "change" event που ανεβαίνει (bubbles)
-        // ώστε να το πιάσει το hx-trigger="change"
-        const event = new Event('change', {bubbles: true});
-        this.input.dispatchEvent(event);
-
-        // Επίσης, αν το htmx περιμένει συγκεκριμένα από το "select",
-        // στέλνουμε ένα custom event
-        this.input.dispatchEvent(new CustomEvent('input', {bubbles: true}));
-        // -------------------------------
-
+        this.input.value = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
+        this.input.setCustomValidity("");
+        this.wrapper.classList.remove('is-invalid');
+        this.input.dispatchEvent(new Event('change', {bubbles: true}));
         this._toggle(false);
         this.wrapper.focus();
     }
