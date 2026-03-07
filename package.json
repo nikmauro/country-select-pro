@@ -1,13 +1,13 @@
 {
   "name": "country-select-pro",
-  "version": "5.6.1",
+  "version": "5.6.2",
   "description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
   "main": "dist/country-select.js",
-  "jsdelivr": "dist/country-select.js",
-  "unpkg": "dist/country-select.js",
-  "browser": "dist/country-select.js",
+  "jsdelivr": "dist/country-select.min.js",
+  "unpkg": "dist/country-select.min.js",
+  "browser": "dist/country-select.min.js",
   "exports": {
-    ".": "./dist/country-select.js"
+    ".": "./dist/country-select.min.js"
   },
   "files": [
     "dist"
@@ -32,5 +32,11 @@
   "bugs": {
     "url": "https://github.com/nikmauro/country-select-pro/issues"
   },
-  "homepage": "https://github.com/nikmauro/country-select-pro"
+  "homepage": "https://github.com/nikmauro/country-select-pro",
+  "devDependencies": {
+    "gulp": "^5.0.1",
+    "gulp-cli": "^3.1.0",
+    "gulp-rename": "^2.1.0",
+    "gulp-terser": "^2.1.0"
+  }
 }
