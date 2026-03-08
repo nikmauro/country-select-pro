@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.6.5
+ * CountrySelect Pro v5.6.7
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -10,12 +10,18 @@
  */
 
 class CountrySelect {
+
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
-        if (this.input.dataset.csInitialized === '1') return;
 
-        this.input.dataset.csInitialized = '1';
+// προσθέτεις class
+        if (!this.input.classList.contains('checkout-trigger')) {
+            this.input.classList.add('checkout-trigger');
+        }
+
+// μετά ελέγχεις αν έχει ήδη init
+        if (this.input.dataset.csInitialized === '1') return;
 
         // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
@@ -167,16 +173,38 @@ class CountrySelect {
 
     async _loadData() {
         try {
-            const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,idd');
-            const data = await res.json();
+            // Καλούμε όλα τα countries με το νέο Bearer Token και κρατάμε μόνο τα πεδία που χρειαζόμαστε
+            const res = await fetch('https://api.restcountries.com/countries/v5?fields=name,flags,cca2,idd', {
+                headers: {
+                    'Authorization': 'Bearer rc_live_96a419d3813542eb8fa455b784674228'
+                }
+            });
 
-            this.countries = data.map(c => ({
-                name: c.name.common,
-                code: c.cca2.toUpperCase(),
-                flag: c.flags.svg,
-                phone: c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : ""),
-                isPreferred: this.preferredCodes.includes(c.cca2.toUpperCase())
-            })).sort((a, b) => a.name.localeCompare(b.name));
+            const responseData = await res.json();
+
+            // Το νέο API επιστρέφει { success: true, data: [...] }
+            const data = responseData.success ? responseData.data : [];
+
+            if (!Array.isArray(data) || data.length === 0) {
+                console.error("No countries array found in response data", responseData);
+                return;
+            }
+
+            this.countries = data.map(c => {
+                // Υπολογισμός του Phone Code (Prefix)
+                let phoneCode = "";
+                if (c.idd && c.idd.root) {
+                    phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
+                }
+
+                return {
+                    name: c.name?.common || "",
+                    code: c.cca2 ? c.cca2.toUpperCase() : "",
+                    flag: c.flags?.svg || "",
+                    phone: phoneCode,
+                    isPreferred: c.cca2 ? this.preferredCodes.includes(c.cca2.toUpperCase()) : false
+                };
+            }).sort((a, b) => a.name.localeCompare(b.name));
 
             this.filteredCountries = [...this.countries];
             this._renderOptions();
@@ -185,7 +213,6 @@ class CountrySelect {
             console.error("CountrySelect API Fail", e);
         }
     }
-
     _syncInitialValue() {
         const val = this.input.value;
         if (!val) {
