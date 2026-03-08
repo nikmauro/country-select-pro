@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.6.5
+ * CountrySelect Pro v5.6.6
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -10,12 +10,18 @@
  */
 
 class CountrySelect {
+
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
-        if (this.input.dataset.csInitialized === '1') return;
 
-        this.input.dataset.csInitialized = '1';
+// προσθέτεις class
+        if (!this.input.classList.contains('checkout-trigger')) {
+            this.input.classList.add('checkout-trigger');
+        }
+
+// μετά ελέγχεις αν έχει ήδη init
+        if (this.input.dataset.csInitialized === '1') return;
 
         // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
