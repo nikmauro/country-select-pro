@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.6.4
+ * CountrySelect Pro v5.6.5
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -13,6 +13,9 @@ class CountrySelect {
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
+        if (this.input.dataset.csInitialized === '1') return;
+
+        this.input.dataset.csInitialized = '1';
 
         // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
@@ -334,18 +337,41 @@ class CountrySelect {
 /** AUTO-INIT (STATIC & HTMX) **/
 const initCS = (target) => {
     const root = (target && target.querySelectorAll) ? target : document;
-    root.querySelectorAll('.country-select').forEach(el => {
-        const hasWrapper = el.nextSibling && el.nextSibling.classList && el.nextSibling.classList.contains('cs-wrapper');
-        if (!hasWrapper) new CountrySelect(el);
+
+    if (root.matches?.('.country-select')) {
+        if (root.dataset.csInitialized !== '1') {
+            new CountrySelect(root);
+        }
+    }
+
+    root.querySelectorAll?.('.country-select').forEach(el => {
+        if (el.dataset.csInitialized === '1') return;
+        new CountrySelect(el);
     });
 };
+
 const setupListeners = () => {
     initCS(document);
-    ['htmx:afterProcess', 'htmx:afterSettle'].forEach(evt => document.body.addEventListener(evt, (e) => initCS(e.detail.target || e.target)));
-    new MutationObserver((m) => m.forEach(mu => mu.addedNodes.length && initCS(mu.target))).observe(document.body, {
+
+    document.body.addEventListener('htmx:afterSettle', (e) => {
+        initCS(e.detail.target || e.target);
+    });
+
+    new MutationObserver((mutations) => {
+        mutations.forEach(mu => {
+            mu.addedNodes.forEach(node => {
+                if (node.nodeType !== 1) return;
+                initCS(node);
+            });
+        });
+    }).observe(document.body, {
         childList: true,
         subtree: true
     });
 };
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupListeners);
-else setupListeners();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupListeners);
+} else {
+    setupListeners();
+}
