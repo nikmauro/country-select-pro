@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.6.3
+ * CountrySelect Pro v5.6.4
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -234,16 +234,16 @@ class CountrySelect {
         // Ενημέρωση τιμής
         this.input.value = (this.valueType === "phone") ? country.phone : (this.valueType === "name" ? country.name : country.code);
 
-        // Reset validation
+        // Reset validation (αν χρησιμοποιείς Bootstrap classes)
         this.input.setCustomValidity("");
         this.wrapper.classList.remove('is-invalid');
 
-        // --- ΤΟ ΚΛΕΙΔΙ ΓΙΑ ΤΟ HTMX ---
-        // 1. Στέλνουμε 'change' (για hx-trigger="change")
-        this.input.dispatchEvent(new Event('change', { bubbles: true }));
+        // 1. Τυπικό change & input (για γενική χρήση)
+        this.input.dispatchEvent(new Event('change', {bubbles: true}));
+        this.input.dispatchEvent(new Event('input', {bubbles: true}));
 
-        // 2. Στέλνουμε 'input' (για hx-trigger="input" ή generic listeners)
-        this.input.dispatchEvent(new Event('input', { bubbles: true }));
+        // 2. ΤΟ ΚΛΕΙΔΙ: Μοναδικό event για το δικό μας HTMX Trigger
+        this.input.dispatchEvent(new Event('country-change', {bubbles: true}));
 
         this._toggle(false);
         this.wrapper.focus();
