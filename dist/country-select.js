@@ -174,37 +174,40 @@ class CountrySelect {
 
 async _loadData() {
     try {
-        // URL του ίδιου folder που βρίσκεται το country-select.js
-        const scriptUrl = new URL(import.meta.url || document.currentScript?.src, window.location.href);
-        const jsonUrl = new URL('data.json', scriptUrl).href;
-
+        // Καλούμε το data.json απευθείας από το jsDelivr CDN
+        // Αντικατάστησε το 'your-username/your-repo@version' με τα δικά σου στοιχεία
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@5.7/dist/data.json';
+        
         const res = await fetch(jsonUrl);
-
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
-
+        if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
+        
         const data = await res.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
-            console.error("Invalid countries data", data);
+        if (!Array.isArray(data)) {
+            console.error("Data is not an array");
             return;
         }
 
-        this.countries = data.map(c => ({
-            name: c.name || "",
-            code: c.code || "",
-            flag: c.flag || "",
-            phone: c.phone || "",
-            isPreferred: this.preferredCodes.includes((c.code || "").toUpperCase())
-        })).sort((a, b) => a.name.localeCompare(b.name));
+        this.countries = data.map(c => {
+            let phoneCode = "";
+            if (c.idd && c.idd.root) {
+                phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
+            }
+
+            return {
+                name: c.name?.common || "",
+                code: c.cca2 ? c.cca2.toUpperCase() : "",
+                flag: c.flags?.svg || "",
+                phone: phoneCode,
+                isPreferred: c.cca2 ? this.preferredCodes.includes(c.cca2.toUpperCase()) : false
+            };
+        }).sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
         this._renderOptions();
         this._syncInitialValue();
-
     } catch (e) {
-        console.error("CountrySelect JSON Load Failed", e);
+        console.error("CountrySelect JSON Load Fail", e);
     }
 }
     
