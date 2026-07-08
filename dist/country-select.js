@@ -217,9 +217,14 @@ async _loadData() {
         if (current) this._updateUI(current);
     }
 
+
     _parseTemplate(template, country) {
-        return template.replace('{img}', `<img src="${country.flag}">`).replace('{name}', `<span>${country.name}</span>`).replace('{code}', `<span>${country.code}</span>`).replace('{phone}', `<span>${country.phone}</span>`);
-    }
+    return template
+        .replace('{img}', `<span class="flag-emoji">${country.flag}</span>`) // Άλλαξα το img tag σε span
+        .replace('{name}', `<span>${country.name}</span>`)
+        .replace('{code}', `<span>${country.code}</span>`)
+        .replace('{phone}', `<span>${country.phone}</span>`);
+}
 
     _renderOptions() {
         const listContainer = this.wrapper.querySelector('.cs-list');
