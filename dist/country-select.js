@@ -59,6 +59,14 @@ class CountrySelect {
 
     _applyStyles() {
         const styles = `
+.cs-no-results {
+    padding: 10px;
+    text-align: center;
+    color: #999;
+    cursor: default;
+    font-style: italic;
+}
+        
             .cs-wrapper { position: relative; font-family: inherit; width: 100%; outline: none; }
             .cs-trigger { 
                 /* Bootstrap 5 Exact Specs */
@@ -224,36 +232,45 @@ class CountrySelect {
         .replace('{phone}', `<span>${country.phone}</span>`);
 }
 
-    _renderOptions() {
-        const listContainer = this.wrapper.querySelector('.cs-list');
-        if (!listContainer) return;
-        listContainer.innerHTML = '';
-        const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
-
-        const preferred = this.filteredCountries.filter(c => c.isPreferred);
-        const others = this.filteredCountries.filter(c => !c.isPreferred);
-
-        const createOption = (country, index) => {
-            const div = document.createElement('div');
-            div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
-            div.innerHTML = this._parseTemplate(this.schema, country);
-            div.onclick = (e) => {
-                e.stopPropagation();
-                this._select(country);
-            };
-            return div;
-        };
-
-        preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
-
-        if (preferred.length > 0 && others.length > 0 && !searchVal) {
-            const hr = document.createElement('div');
-            hr.className = 'cs-divider';
-            listContainer.appendChild(hr);
-        }
-
-        others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
+   _renderOptions() {
+    const listContainer = this.wrapper.querySelector('.cs-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
+    
+    // Έλεγχος αν η λίστα είναι άδεια
+    if (this.filteredCountries.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'cs-no-results';
+        noResults.innerHTML = '<span class="cs-no-results-text">Not found</span>';
+        listContainer.appendChild(noResults);
+        return; // Σταματάμε εδώ
     }
+
+    const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
+    const preferred = this.filteredCountries.filter(c => c.isPreferred);
+    const others = this.filteredCountries.filter(c => !c.isPreferred);
+
+    const createOption = (country, index) => {
+        const div = document.createElement('div');
+        div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
+        div.innerHTML = this._parseTemplate(this.schema, country);
+        div.onclick = (e) => {
+            e.stopPropagation();
+            this._select(country);
+        };
+        return div;
+    };
+
+    preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
+
+    if (preferred.length > 0 && others.length > 0 && !searchVal) {
+        const hr = document.createElement('div');
+        hr.className = 'cs-divider';
+        listContainer.appendChild(hr);
+    }
+
+    others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
+}
 
     _select(country) {
         this._updateUI(country);
