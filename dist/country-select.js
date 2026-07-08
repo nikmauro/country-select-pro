@@ -347,34 +347,37 @@ class CountrySelect {
             this._toggle();
         };
 
-        // Μέσα στη μέθοδο _bindEvents() αλλάζεις το block του keydown:
-this.wrapper.addEventListener('keydown', (e) => {
+ this.wrapper.addEventListener('keydown', (e) => {
     if (!this.isOpen && (e.key === 'ArrowDown')) {
         e.preventDefault();
         this._toggle(true);
         return;
     }
+    
     if (this.isOpen) {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            this.activeIndex++;
-            this._updateActiveElement();
-            this._scrollToActive();
+            // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παρακάτω;
+            if (this.activeIndex < this.filteredCountries.length - 1) {
+                this.activeIndex++;
+                this._updateActiveElement();
+                this._scrollToActive();
+            }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            this.activeIndex--;
-            this._updateActiveElement();
-            this._scrollToActive();
+            // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παραπάνω;
+            if (this.activeIndex > 0) {
+                this.activeIndex--;
+                this._updateActiveElement();
+                this._scrollToActive();
+            }
         } else if (e.key === 'Escape') {
             this._toggle(false);
-        } else if (e.key === 'Enter') { // <-- ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟ ENTER
+        } else if (e.key === 'Enter') {
             e.preventDefault();
-            const pref = this.filteredCountries.filter(c => c.isPreferred);
-            const oth = this.filteredCountries.filter(c => !c.isPreferred);
-            const fullList = [...pref, ...oth];
-            
-            if (this.activeIndex > -1 && fullList[this.activeIndex]) {
-                this._select(fullList[this.activeIndex]);
+            // Εδώ πρέπει να είμαστε σίγουροι ότι το activeIndex είναι έγκυρο
+            if (this.activeIndex >= 0 && this.activeIndex < this.filteredCountries.length) {
+                this._select(this.filteredCountries[this.activeIndex]);
             }
         }
     }
