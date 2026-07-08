@@ -176,7 +176,7 @@ async _loadData() {
     try {
         // Καλούμε το data.json απευθείας από το jsDelivr CDN
         // Αντικατάστησε το 'your-username/your-repo@version' με τα δικά σου στοιχεία
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@5.7/dist/data.json';
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@5.6.4/dist/data.json';
         
         const res = await fetch(jsonUrl);
         if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
