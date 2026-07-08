@@ -171,48 +171,41 @@ class CountrySelect {
             this.wrapper.classList.remove('drop-up');
         }
     }
-
 async _loadData() {
     try {
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6/dist/data.json'; 
-        
+        // Βεβαιώσου ότι το URL δείχνει στο αρχείο σου
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1/dist/data.json'; 
         const res = await fetch(jsonUrl);
-        if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
-        
         const responseData = await res.json();
+        
+        // Πρόσβαση στο σωστό path βάσει της δομής
         const data = responseData?.data?.objects || [];
 
-        if (!Array.isArray(data) || data.length === 0) {
-            console.error("Countries array not found inside data.objects", responseData);
-            return;
-        }
-
         this.countries = data.map(c => {
-            // --- ΤΟ FIX ΕΙΝΑΙ ΕΔΩ ---
-            // Διαβάζουμε το calling_codes (π.χ. ["30"]) και προσθέτουμε το "+"
-            let phoneCode = "";
-            if (c.calling_codes && c.calling_codes.length > 0 && c.calling_codes[0] !== "") {
-                phoneCode = "+" + c.calling_codes[0];
-            }
+            // Ανάκτηση πρώτου κωδικού κλήσης
+            const phoneVal = (c.calling_codes && c.calling_codes.length > 0) 
+                             ? `+${c.calling_codes[0]}` 
+                             : "";
 
             return {
                 name: c.names?.common || "",
                 code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
-                flag: c.flag?.url_svg || c.flag?.url_png || "", 
-                phone: phoneCode,
-                // Το preferred παίζει ήδη σωστά επειδή βασίζεται στο alpha_2 (π.χ. GR, CY)
+                flag: c.flag?.emoji || "", // Χρήση του emoji από το JSON[cite: 5]
+                phone: phoneVal,
                 isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
             };
-        }).filter(c => c.code !== "") 
-          .sort((a, b) => a.name.localeCompare(b.name));
+        })
+        .filter(c => c.code !== "") // Αφαιρούμε εγγραφές χωρίς κωδικό[cite: 5]
+        .sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
         this._renderOptions();
-        this._syncInitialValue(); // Τώρα θα βρει το "+30" και θα το επιλέξει!
+        this._syncInitialValue();
     } catch (e) {
-        console.error("CountrySelect JSON Load Fail", e);
+        console.error("CountrySelect Data Load Error:", e);
     }
 }
+
     
     _syncInitialValue() {
         const val = this.input.value;
