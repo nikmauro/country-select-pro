@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v5.6.7
+ * CountrySelect Pro v6
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -175,7 +175,7 @@ class CountrySelect {
 async _loadData() {
     try {
         // Καλούμε το data.json (από το jsDelivr ή το τοπικό σου path)
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/your-username/your-repo@main/data.json'; 
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@v6/dist/data.json'; 
         
         const res = await fetch(jsonUrl);
         if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
