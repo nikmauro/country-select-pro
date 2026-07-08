@@ -313,26 +313,40 @@ async _loadData() {
             e.stopPropagation();
             this._toggle();
         };
-        this.wrapper.addEventListener('keydown', (e) => {
-            if (!this.isOpen && (e.key === 'ArrowDown')) {
-                e.preventDefault();
-                this._toggle(true);
-                return;
+
+        // Μέσα στη μέθοδο _bindEvents() αλλάζεις το block του keydown:
+this.wrapper.addEventListener('keydown', (e) => {
+    if (!this.isOpen && (e.key === 'ArrowDown')) {
+        e.preventDefault();
+        this._toggle(true);
+        return;
+    }
+    if (this.isOpen) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.activeIndex++;
+            this._renderOptions();
+            this._scrollToActive();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.activeIndex--;
+            this._renderOptions();
+            this._scrollToActive();
+        } else if (e.key === 'Escape') {
+            this._toggle(false);
+        } else if (e.key === 'Enter') { // <-- ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟ ENTER
+            e.preventDefault();
+            const pref = this.filteredCountries.filter(c => c.isPreferred);
+            const oth = this.filteredCountries.filter(c => !c.isPreferred);
+            const fullList = [...pref, ...oth];
+            
+            if (this.activeIndex > -1 && fullList[this.activeIndex]) {
+                this._select(fullList[this.activeIndex]);
             }
-            if (this.isOpen) {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    this.activeIndex++;
-                    this._renderOptions();
-                    this._scrollToActive();
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.activeIndex--;
-                    this._renderOptions();
-                    this._scrollToActive();
-                } else if (e.key === 'Escape') this._toggle(false);
-            }
-        });
+        }
+    }
+});
+        
         if (this.hasSearch) {
             this.wrapper.querySelector('.cs-search-input').oninput = (e) => {
                 const term = e.target.value.toLowerCase();
