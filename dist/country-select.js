@@ -174,34 +174,40 @@ class CountrySelect {
 
 async _loadData() {
     try {
-        // Καλούμε το data.json απευθείας από το jsDelivr CDN
-        // Αντικατάστησε το 'your-username/your-repo@version' με τα δικά σου στοιχεία
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@5.6.4/dist/data.json';
+        // Καλούμε το data.json (από το jsDelivr ή το τοπικό σου path)
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/your-username/your-repo@main/data.json'; 
         
         const res = await fetch(jsonUrl);
         if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
         
-        const data = await res.json();
+        const responseData = await res.json();
 
-        if (!Array.isArray(data)) {
-            console.error("Data is not an array");
+        // --- Η ΔΙΟΡΘΩΣΗ ΓΙΑ ΤΗ ΔΟΜΗ ΣΟΥ ---
+        // Απομονώνουμε το array που βρίσκεται μέσα στο data.objects
+        const data = responseData?.data?.objects || [];
+
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error("Countries array not found inside data.objects", responseData);
             return;
         }
 
+        // Mapping των δεδομένων με βάση τα πεδία του αρχείου σου
         this.countries = data.map(c => {
             let phoneCode = "";
-            if (c.idd && c.idd.root) {
-                phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
+            // Στο αρχείο σου το πεδίο είναι c.calling_codes (Array)
+            if (c.calling_codes && c.calling_codes.length > 0) {
+                phoneCode = "+" + c.calling_codes[0];
             }
 
             return {
-                name: c.name?.common || "",
-                code: c.cca2 ? c.cca2.toUpperCase() : "",
-                flag: c.flags?.svg || "",
+                name: c.names?.common || "",
+                code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
+                flag: c.flag?.url_svg || c.flag?.url_png || "", // Παίρνει το SVG ή το PNG από το αρχείο σου
                 phone: phoneCode,
-                isPreferred: c.cca2 ? this.preferredCodes.includes(c.cca2.toUpperCase()) : false
+                isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
             };
-        }).sort((a, b) => a.name.localeCompare(b.name));
+        }).filter(c => c.code !== "") // Φιλτράρουμε χώρες που δεν έχουν ISO code (όπως η Αμπχαζία στην αρχή του αρχείου)
+          .sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
         this._renderOptions();
