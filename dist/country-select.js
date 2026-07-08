@@ -311,27 +311,35 @@ class CountrySelect {
         if (content) content.innerHTML = this._parseTemplate(this.schemaReturn, country);
     }
 
-    _toggle(force) {
-        if (this.countries.length === 0) return;
-        this.isOpen = force !== undefined ? force : !this.isOpen;
-        if (this.isOpen) {
-            this._updatePosition();
-            document.dispatchEvent(new CustomEvent('cs-close-others', {detail: {opener: this.wrapper}}));
+   _toggle(force) {
+    if (this.countries.length === 0) return;
+    this.isOpen = force !== undefined ? force : !this.isOpen;
+    
+    if (this.isOpen) {
+        this._updatePosition();
+        document.dispatchEvent(new CustomEvent('cs-close-others', {detail: {opener: this.wrapper}}));
 
+        // ΑΛΛΑΓΗ: Έλεγχος αν η λίστα έχει ήδη στοιχεία
+        const list = this.wrapper.querySelector('.cs-list');
+        if (list.children.length === 0) {
             this._renderOptions();
-            const list = this.wrapper.querySelector('.cs-list');
-            list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
-
-            const pref = this.filteredCountries.filter(c => c.isPreferred);
-            const oth = this.filteredCountries.filter(c => !c.isPreferred);
-            const fullList = [...pref, ...oth];
-            this.activeIndex = fullList.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
-
-            if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 0);
-            if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
         }
-        this.wrapper.classList.toggle('open', this.isOpen);
+
+        list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
+
+        const pref = this.filteredCountries.filter(c => c.isPreferred);
+        const oth = this.filteredCountries.filter(c => !c.isPreferred);
+        const fullList = [...pref, ...oth];
+        this.activeIndex = fullList.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
+
+        // ΑΛΛΑΓΗ: Ενημέρωσε το active element αντί να κάνεις re-render όλη τη λίστα
+        this._updateActiveElement();
+
+        if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 0);
+        if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
     }
+    this.wrapper.classList.toggle('open', this.isOpen);
+}
 
     _bindEvents() {
         this.wrapper.querySelector('.cs-trigger').onclick = (e) => {
