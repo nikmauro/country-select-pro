@@ -9,7 +9,6 @@
  * ---------------------------------------------------------------------------
  */
 
-console.log("CountrySelect Pro v5.6.7");
 
 class CountrySelect {
 
