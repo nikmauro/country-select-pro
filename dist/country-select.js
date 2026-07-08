@@ -91,6 +91,11 @@ class CountrySelect {
                 box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
             }
 
+            .flag-emoji {
+                font-size: 1.2em; /* Για να φαίνεται πιο καθαρό το emoji */
+                margin-right: 8px;
+            }
+
             .cs-dropdown { 
                 position: absolute; left: 0; right: 0; background: #fff; 
                 border: 1px solid rgba(0,0,0,.15); border-radius: 0.375rem;
