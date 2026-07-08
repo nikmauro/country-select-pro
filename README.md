@@ -28,7 +28,7 @@ CountrySelect Pro provides a clean and fast country dropdown with **search, phon
 
 Try the interactive demo:
 
-https://nikmauro.github.io/country-select-pro/
+https://nikmauro.github.io/country-select-pro/docs/
 
 ---
 
