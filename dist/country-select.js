@@ -174,15 +174,12 @@ class CountrySelect {
 
 async _loadData() {
     try {
-        // Το ακριβές URL σου στο jsDelivr
         const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6/dist/data.json'; 
         
         const res = await fetch(jsonUrl);
         if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
         
         const responseData = await res.json();
-
-        // Παίρνουμε το array από το objects
         const data = responseData?.data?.objects || [];
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -191,10 +188,11 @@ async _loadData() {
         }
 
         this.countries = data.map(c => {
-            // Σωστή ανάκτηση του Phone Code από το idd struct του JSON σου
+            // --- ΤΟ FIX ΕΙΝΑΙ ΕΔΩ ---
+            // Διαβάζουμε το calling_codes (π.χ. ["30"]) και προσθέτουμε το "+"
             let phoneCode = "";
-            if (c.idd && c.idd.root) {
-                phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
+            if (c.calling_codes && c.calling_codes.length > 0 && c.calling_codes[0] !== "") {
+                phoneCode = "+" + c.calling_codes[0];
             }
 
             return {
@@ -202,14 +200,15 @@ async _loadData() {
                 code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
                 flag: c.flag?.url_svg || c.flag?.url_png || "", 
                 phone: phoneCode,
+                // Το preferred παίζει ήδη σωστά επειδή βασίζεται στο alpha_2 (π.χ. GR, CY)
                 isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
             };
-        }).filter(c => c.code !== "") // Φιλτράρουμε όσα δεν έχουν ISO code (π.χ. Abkhazia)
+        }).filter(c => c.code !== "") 
           .sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
         this._renderOptions();
-        this._syncInitialValue();
+        this._syncInitialValue(); // Τώρα θα βρει το "+30" και θα το επιλέξει!
     } catch (e) {
         console.error("CountrySelect JSON Load Fail", e);
     }
