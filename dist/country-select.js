@@ -172,6 +172,19 @@ class CountrySelect {
         this.input.parentNode.insertBefore(this.wrapper, this.input.nextSibling);
     }
 
+    _updateActiveElement() {
+    const options = this.wrapper.querySelectorAll('.cs-option');
+    options.forEach((el, index) => {
+        if (index === this.activeIndex) {
+            el.classList.add('active');
+            // Bonus UX: Κάνει scroll αν το element είναι εκτός οθόνης
+            el.scrollIntoView({ block: 'nearest' });
+        } else {
+            el.classList.remove('active');
+        }
+    });
+}
+
     _updatePosition() {
         const rect = this.wrapper.getBoundingClientRect();
         const dropdownHeight = (this.rowLimit * this.rowHeight) + (this.hasSearch ? 60 : 0);
@@ -337,12 +350,12 @@ this.wrapper.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             this.activeIndex++;
-            this._renderOptions();
+            this._updateActiveElement();
             this._scrollToActive();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             this.activeIndex--;
-            this._renderOptions();
+            this._updateActiveElement();
             this._scrollToActive();
         } else if (e.key === 'Escape') {
             this._toggle(false);
