@@ -176,38 +176,31 @@ class CountrySelect {
             this.wrapper.classList.remove('drop-up');
         }
     }
-async _loadData() {
+
+    async _loadData() {
     try {
-        // Βεβαιώσου ότι το URL δείχνει στο αρχείο σου
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1/dist/data.json'; 
-        const res = await fetch(jsonUrl);
-        const responseData = await res.json();
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1/dist/data.json';
         
-        // Πρόσβαση στο σωστό path βάσει της δομής
-        const data = responseData?.data?.objects || [];
+        const res = await fetch(jsonUrl);
+        const json = await res.json();
+        const data = json?.data?.objects || [];
 
         this.countries = data.map(c => {
-            // Ανάκτηση πρώτου κωδικού κλήσης
-            const phoneVal = (c.calling_codes && c.calling_codes.length > 0) 
-                             ? `+${c.calling_codes[0]}` 
-                             : "";
-
             return {
                 name: c.names?.common || "",
                 code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
-                flag: c.flag?.emoji || "", // Χρήση του emoji από το JSON[cite: 5]
-                phone: phoneVal,
+                flag: c.flag?.emoji || "", // Χρησιμοποιούμε το emoji
+                phone: (c.calling_codes && c.calling_codes.length > 0) ? `+${c.calling_codes[0]}` : "",
                 isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
             };
-        })
-        .filter(c => c.code !== "") // Αφαιρούμε εγγραφές χωρίς κωδικό[cite: 5]
-        .sort((a, b) => a.name.localeCompare(b.name));
+        }).filter(c => c.code !== "")
+          .sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
         this._renderOptions();
         this._syncInitialValue();
     } catch (e) {
-        console.error("CountrySelect Data Load Error:", e);
+        console.error("CountrySelect Load Fail:", e);
     }
 }
 
