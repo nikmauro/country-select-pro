@@ -173,48 +173,42 @@ class CountrySelect {
         }
     }
 
-    async _loadData() {
-        try {
-            // Καλούμε όλα τα countries με το νέο Bearer Token και κρατάμε μόνο τα πεδία που χρειαζόμαστε
-            const res = await fetch('https://api.restcountries.com/countries/v5?fields=name,flags,cca2,idd', {
-                headers: {
-                    'Authorization': 'Bearer rc_live_96a419d3813542eb8fa455b784674228'
-                }
-            });
+async _loadData() {
+    try {
+        // URL του ίδιου folder που βρίσκεται το country-select.js
+        const scriptUrl = new URL(import.meta.url || document.currentScript?.src, window.location.href);
+        const jsonUrl = new URL('data.json', scriptUrl).href;
 
-            const responseData = await res.json();
+        const res = await fetch(jsonUrl);
 
-            // Το νέο API επιστρέφει { success: true, data: [...] }
-            const data = responseData.success ? responseData.data : [];
-
-            if (!Array.isArray(data) || data.length === 0) {
-                console.error("No countries array found in response data", responseData);
-                return;
-            }
-
-            this.countries = data.map(c => {
-                // Υπολογισμός του Phone Code (Prefix)
-                let phoneCode = "";
-                if (c.idd && c.idd.root) {
-                    phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
-                }
-
-                return {
-                    name: c.name?.common || "",
-                    code: c.cca2 ? c.cca2.toUpperCase() : "",
-                    flag: c.flags?.svg || "",
-                    phone: phoneCode,
-                    isPreferred: c.cca2 ? this.preferredCodes.includes(c.cca2.toUpperCase()) : false
-                };
-            }).sort((a, b) => a.name.localeCompare(b.name));
-
-            this.filteredCountries = [...this.countries];
-            this._renderOptions();
-            this._syncInitialValue();
-        } catch (e) {
-            console.error("CountrySelect API Fail", e);
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
         }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error("Invalid countries data", data);
+            return;
+        }
+
+        this.countries = data.map(c => ({
+            name: c.name || "",
+            code: c.code || "",
+            flag: c.flag || "",
+            phone: c.phone || "",
+            isPreferred: this.preferredCodes.includes((c.code || "").toUpperCase())
+        })).sort((a, b) => a.name.localeCompare(b.name));
+
+        this.filteredCountries = [...this.countries];
+        this._renderOptions();
+        this._syncInitialValue();
+
+    } catch (e) {
+        console.error("CountrySelect JSON Load Failed", e);
     }
+}
+    
     _syncInitialValue() {
         const val = this.input.value;
         if (!val) {
