@@ -8,7 +8,7 @@
  * - Zero Dependencies
  * ---------------------------------------------------------------------------
  */
-
+ 
 class CountrySelect {
 
     constructor(element, options = {}) {
