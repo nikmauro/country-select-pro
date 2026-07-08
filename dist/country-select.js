@@ -174,16 +174,15 @@ class CountrySelect {
 
 async _loadData() {
     try {
-        // Καλούμε το data.json (από το jsDelivr ή το τοπικό σου path)
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@v6/dist/data.json'; 
+        // Το ακριβές URL σου στο jsDelivr
+        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6/dist/data.json'; 
         
         const res = await fetch(jsonUrl);
         if (!res.ok) throw new Error(`Failed to load ${jsonUrl} (Status: ${res.status})`);
         
         const responseData = await res.json();
 
-        // --- Η ΔΙΟΡΘΩΣΗ ΓΙΑ ΤΗ ΔΟΜΗ ΣΟΥ ---
-        // Απομονώνουμε το array που βρίσκεται μέσα στο data.objects
+        // Παίρνουμε το array από το objects
         const data = responseData?.data?.objects || [];
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -191,22 +190,21 @@ async _loadData() {
             return;
         }
 
-        // Mapping των δεδομένων με βάση τα πεδία του αρχείου σου
         this.countries = data.map(c => {
+            // Σωστή ανάκτηση του Phone Code από το idd struct του JSON σου
             let phoneCode = "";
-            // Στο αρχείο σου το πεδίο είναι c.calling_codes (Array)
-            if (c.calling_codes && c.calling_codes.length > 0) {
-                phoneCode = "+" + c.calling_codes[0];
+            if (c.idd && c.idd.root) {
+                phoneCode = c.idd.root + (c.idd.suffixes ? (c.idd.suffixes.length > 1 ? "" : c.idd.suffixes[0]) : "");
             }
 
             return {
                 name: c.names?.common || "",
                 code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
-                flag: c.flag?.url_svg || c.flag?.url_png || "", // Παίρνει το SVG ή το PNG από το αρχείο σου
+                flag: c.flag?.url_svg || c.flag?.url_png || "", 
                 phone: phoneCode,
                 isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
             };
-        }).filter(c => c.code !== "") // Φιλτράρουμε χώρες που δεν έχουν ISO code (όπως η Αμπχαζία στην αρχή του αρχείου)
+        }).filter(c => c.code !== "") // Φιλτράρουμε όσα δεν έχουν ISO code (π.χ. Abkhazia)
           .sort((a, b) => a.name.localeCompare(b.name));
 
         this.filteredCountries = [...this.countries];
