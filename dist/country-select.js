@@ -6,6 +6,7 @@
  * - HTMX Auto-initialization
  * - Improved Validation UI
  * - Zero Dependencies
+ * - 4x3, 1x1 Flags
  * ---------------------------------------------------------------------------
  */
 
