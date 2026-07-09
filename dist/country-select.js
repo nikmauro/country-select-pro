@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v6
+ * CountrySelect Pro v6.1.2
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -14,6 +14,8 @@ class CountrySelect {
 
     constructor(element, options = {}) {
         this.input = element;
+        
+        
         if (!this.input) return;
 
 // προσθέτεις class
@@ -46,7 +48,7 @@ class CountrySelect {
         this.isOpen = false;
         this.activeIndex = -1;
         this.rowHeight = 44;
-
+        this.baseUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.2/';
         this._init();
     }
 
@@ -65,6 +67,16 @@ class CountrySelect {
     color: #999;
     cursor: default;
     font-style: italic;
+}
+
+.cs-flag-img {
+    width: 22px !important;  
+    height: 16px !important; 
+    object-fit: cover; /* Ή contain, ανάλογα πώς φαίνεται καλύτερα */
+    vertical-align: middle;
+    margin-right: 8px;
+    border-radius: 2px;
+    display: inline-block;
 }
         
             .cs-wrapper { position: relative; font-family: inherit; width: 100%; outline: none; }
@@ -200,19 +212,21 @@ class CountrySelect {
 
     async _loadData() {
     try {
-        const jsonUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1/dist/data.json';
+        const jsonUrl = `${this.baseUrl}dist/data.json`; // Χρήση του baseUrl
         
         const res = await fetch(jsonUrl);
         const json = await res.json();
         const data = json?.data?.objects || [];
 
         this.countries = data.map(c => {
+            const code = c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "";
             return {
                 name: c.names?.common || "",
-                code: c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "",
-                flag: c.flag?.emoji || "", // Χρησιμοποιούμε το emoji
+                code: code,
+                // Δημιουργία path για το SVG με βάση το code
+                flag: code ? `${this.baseUrl}dist/flags/4x3/${code.toLowerCase()}.svg` : "",
                 phone: (c.calling_codes && c.calling_codes.length > 0) ? `+${c.calling_codes[0]}` : "",
-                isPreferred: c.codes?.alpha_2 ? this.preferredCodes.includes(c.codes.alpha_2.toUpperCase()) : false
+                isPreferred: code ? this.preferredCodes.includes(code) : false
             };
         }).filter(c => c.code !== "")
           .sort((a, b) => a.name.localeCompare(b.name));
@@ -239,7 +253,7 @@ class CountrySelect {
 
     _parseTemplate(template, country) {
     return template
-        .replace('{img}', `<span class="flag-emoji">${country.flag}</span>`) // Άλλαξα το img tag σε span
+        .replace('{img}', `<img src="${country.flag}" class="cs-flag-img" loading="lazy" alt="${country.name}">`)
         .replace('{name}', `<span>${country.name}</span>`)
         .replace('{code}', `<span>${country.code}</span>`)
         .replace('{phone}', `<span>${country.phone}</span>`);
