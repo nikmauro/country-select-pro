@@ -13,19 +13,16 @@
 
 class CountrySelect {
 
+    
     constructor(element, options = {}) {
         this.input = element;
-        
-        
         if (!this.input) return;
 
-// προσθέτεις class
-        if (!this.input.classList.contains('checkout-trigger')) {
-            this.input.classList.add('checkout-trigger');
-        }
-
-// μετά ελέγχεις αν έχει ήδη init
+        // 1. ΕΛΕΓΧΟΣ HTMX: Αν έχει ήδη γίνει init, σταμάτα αμέσως
         if (this.input.dataset.csInitialized === '1') return;
+
+        // 2. ΚΛΕΙΔΩΜΑ HTMX: Σημειώνουμε ότι έγινε init ΠΡΙΝ τρέξει το async _init()
+        this.input.dataset.csInitialized = '1';
 
         // Configuration
         this.schema = this.input.dataset.schema || "{img} {name}";
@@ -49,7 +46,10 @@ class CountrySelect {
         this.isOpen = false;
         this.activeIndex = -1;
         this.rowHeight = 44;
+        
+        // Base URL για το JSON και τα SVG flags
         this.baseUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.2/';
+        
         this._init();
     }
 
