@@ -39,7 +39,7 @@ https://nikmauro.github.io/country-select-pro/docs/
 Include the script via **jsDelivr**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@4.8.2/dist/country-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.1.3/dist/country-select.min.js"></script>
 ```
 
 ---
@@ -49,7 +49,7 @@ Include the script via **jsDelivr**:
 Download the repository and include:
 
 ```html
-<script src="dist/country-select.min.js"></script>
+<script src="dist/country-select.js"></script>
 ```
 
 ---
@@ -128,8 +128,8 @@ country-select-pro
 │
 ├─ dist
 │   ├─ country-select.js
-│   └─ country-select.min.js
-│
+│   └─ data.json
+├─ flags
 ├─ demo
 ├─ src
 └─ README.md
@@ -172,8 +172,6 @@ Contributions are welcome.
 
 Developed by **Nikolaos Mavroeidis**
 GitHub: https://github.com/nikmauro
-
-With collaborative assistance from **Gemini (Google AI)**.
 
 ---
 
