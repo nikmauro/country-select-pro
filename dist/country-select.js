@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v6.1.2
+ * CountrySelect Pro v6.1.3
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -48,7 +48,7 @@ class CountrySelect {
         this.rowHeight = 44;
         
         // Base URL για το JSON και τα SVG flags
-        this.baseUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.2/';
+        this.baseUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/';
         
         this._init();
     }
