@@ -1,6 +1,6 @@
-/*! CountrySelect Pro v6.4.1 | MIT | https://github.com/nikmauro/country-select-pro */
+/*! CountrySelect Pro v6.5.0 | MIT | https://github.com/nikmauro/country-select-pro */
 /**
- * CountrySelect Pro v6.4.1
+ * CountrySelect Pro v6.5.0
  * ---------------------------------------------------------------------------
  * Vanilla JS country selector — zero dependencies
  * - Bootstrap 5 ή χωρίς framework: θέμα με CSS μεταβλητές --cs-* (fallback στις --bs-*, άρα και dark mode του Bootstrap)
@@ -18,7 +18,7 @@
     if (typeof document === 'undefined') return;
     if (global.CountrySelect && global.CountrySelect.version) return; // ήδη φορτωμένο στη σελίδα — ένα αντίγραφο αρκεί
 
-    const VERSION = '6.4.1';
+    const VERSION = '6.5.0';
     // Μόνο για τις σημαίες (η λίστα είναι μέσα στο JS) — ίδια έκδοση στο npm
     const DEFAULT_BASE_URL = 'https://cdn.jsdelivr.net/npm/country-select-pro@' + VERSION + '/';
 

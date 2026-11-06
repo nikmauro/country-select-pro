@@ -4,6 +4,8 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 ## [Unreleased]
 
+## [6.5.0] – 2026-11-06
+
 ### Added
 - **The list is no longer clipped inside modals, offcanvas, `<dialog>` or `overflow: hidden` containers**: it opens in the browser's top layer (Popover API) while staying in the same place in the DOM – so Bootstrap's focus trap, clicks and <kbd>Esc</kbd> (closes only the list, not the modal / dialog) keep working. It is positioned under / above the control and follows it on scroll, resize, modal animations and page changes; it closes when the control scrolls off screen. `data-popover="false"` keeps the previous in-page list; browsers without the Popover API use it automatically.
 
@@ -128,6 +130,7 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 - First releases: search, templates (`data-schema`, `data-schema-return`), phone / code values, dropdown width, row count.
 
+[6.5.0]: https://github.com/nikmauro/country-select-pro/compare/6.4.1...6.5.0
 [6.4.1]: https://github.com/nikmauro/country-select-pro/compare/6.4.0...6.4.1
 [6.4.0]: https://github.com/nikmauro/country-select-pro/compare/6.3.1...6.4.0
 [6.3.1]: https://github.com/nikmauro/country-select-pro/compare/6.3.0...6.3.1
