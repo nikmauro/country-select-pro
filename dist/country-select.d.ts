@@ -92,7 +92,7 @@ export interface CountrySelectOptions {
     fetchOptions?: RequestInit;
     /** Fill missing names / calling codes of your list from the built-in list. Default true. */
     merge?: boolean;
-    /** Folder with dist/data.json and dist/flags/ (self-hosting). `data-base-url` */
+    /** Folder that contains dist/flags/ (self-hosting the flags; the country list is inside the script). `data-base-url` */
     baseUrl?: string;
     /** Flag URL template: `{code}` = "gr", `{CODE}` = "GR". `data-flag-path` */
     flagPath?: string;
@@ -120,7 +120,7 @@ export declare class CountrySelect {
     constructor(element: HTMLInputElement | HTMLSelectElement | string, options?: CountrySelectOptions);
 
     static readonly version: string;
-    /** Default folder of dist/data.json and dist/flags/. */
+    /** Default folder of dist/flags/ (jsDelivr, same version). */
     static baseUrl: string;
     /** Global defaults (from `window.CountrySelectConfig`). */
     static defaults: CountrySelectConfig;

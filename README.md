@@ -18,7 +18,7 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 * 🔍 **Smart search** – accent-insensitive (`cote` → Côte…, `ελλαδα` → Ελλάδα), by name, ISO code or phone code, best matches first.
 * 🌐 **Localized names** – country names in any language via `Intl.DisplayNames` (`data-lang="el"`).
 * ♿ **Accessible** – ARIA combobox / listbox, full keyboard support, live result count, forced-colors and reduced-motion support.
-* ⚡ **SEO & performance friendly** – progressive enhancement with `<select>`, one shared data request per page, lazy flags with fixed size (no layout shift), self-hosting option.
+* ⚡ **SEO & performance friendly** – progressive enhancement with `<select>`, the country list inside the script (no data request), lazy flags with fixed size (no layout shift), self-hosting option.
 * 🔁 **htmx ready** – auto-init on swapped / morphed / cloned content.
 
 ---
@@ -36,16 +36,16 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 ### CDN
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.1/dist/country-select.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.4.0/dist/country-select.min.js" defer></script>
 ```
 
 The CSS is included in the script. For a strict **Content Security Policy** (no `'unsafe-inline'` styles) load the stylesheet instead – the script detects it and adds no `<style>`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.1/dist/country-select.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-pro@6.4.0/dist/country-select.min.css">
 ```
 
-(The arrow is an SVG `data:` image: allow `img-src data:`; flags and the country list come from `cdn.jsdelivr.net` unless you [self-host](#-seo--performance) them.)
+(The arrow is an SVG `data:` image: allow `img-src data:`; the flags come from `cdn.jsdelivr.net` unless you [self-host](#-seo--performance) them; the country list is inside the script.)
 
 ### npm
 
@@ -68,7 +68,7 @@ TypeScript types are included (`CountrySelectOptions`, `CountrySelectCountry`, `
 | `dist/country-select.mjs` | ES module |
 | `dist/country-select.css` / `.min.css` | Stylesheet (optional) |
 | `dist/country-select.d.ts` | TypeScript types |
-| `dist/data.json`, `dist/flags/` | Country list, SVG flags |
+| `dist/data.json`, `dist/flags/` | The built-in country list as JSON (for your own use), SVG flags |
 
 ---
 
@@ -139,7 +139,7 @@ Every option can be set as a `data-*` attribute or as a JavaScript option (JS wi
 | `data-sort` | `sort` | `true` | `false` = keep the order of your list |
 | `data-countries` | `countries` | – | Your list (see below) |
 | `data-src` | `dataUrl` | – | URL of your list (JSON) |
-| `data-base-url` | `baseUrl` | jsDelivr | Where `dist/data.json` and `dist/flags/` live (self-hosting) |
+| `data-base-url` | `baseUrl` | jsDelivr | Folder that contains `dist/flags/` (self-hosting the flags) |
 | `data-flag-path` | `flagPath` | `{baseUrl}dist/flags/4x3/{code}.svg` | Flag URL template (`{code}` = `gr`, `{CODE}` = `GR`) |
 | – | `fetchOptions` | – | `fetch()` options for `dataUrl` |
 | – | `merge` | `true` | Fill missing names / phone codes of your list from the built-in list |
@@ -164,7 +164,7 @@ new CountrySelect(el, {countries: () => fetch('/api/countries').then(r => r.json
 cs.setCountries(['GR', 'CY']); // replace the list later
 ```
 
-Accepted formats: an array of codes or objects, `{countries: [...]}`, `{data: [...]}`, `{"GR": "Greece", ...}` or the built-in `data.json` format. Item fields: `code` (`iso2`, `alpha2`), `name` (`label`, `text`), `phone` (`dial_code`), `flag` (URL or `false`), `value` (custom value), `keywords` (extra search words).
+Accepted formats: an array of codes or objects, `{countries: [...]}`, `{data: [...]}`, `{"GR": "Greece", ...}` or the `dist/data.json` format. Item fields: `code` (`iso2`, `alpha2`), `name` (`label`, `text`), `phone` (`dial_code`), `flag` (URL or `false`), `value` (custom value), `keywords` (extra search words).
 
 ---
 
@@ -230,9 +230,9 @@ Any option can be a default here, plus `css: false` and `autoInit: false`.
 ## 🔎 SEO & performance
 
 * Use a `<select>` (or an input with a value) – the content is in the HTML and works without JavaScript.
-* One request for the built-in list per page, no matter how many selectors.
+* The country list (~5 KB) is inside the script – no extra request, works offline.
 * Flags are lazy-loaded, async-decoded and have a fixed size (no layout shift / CLS).
-* Self-host the data and flags with `baseUrl` / `flagPath` to avoid third-party requests.
+* Self-host the flags with `baseUrl` / `flagPath` to avoid third-party requests (or `data-flags="false"`).
 
 ---
 
@@ -250,7 +250,8 @@ dist/
 ├─ country-select.mjs       │ built by `npm run build`
 ├─ country-select.css       │ (published to npm, not in git)
 ├─ country-select.min.css   ┘
-├─ data.json                countries: names, ISO codes, phone codes
+├─ data.json                the built-in country list as JSON (generated)
+├─ data.LICENSE.md          sources and licenses of the country list
 └─ flags/                   SVG flags (4x3, 1x1) – flag-icons, MIT
 test/                       type check (`npm run check:types`), ESM and CSP test pages
 docs/index.html             live demo, examples, settings playground
@@ -272,7 +273,7 @@ Developed by **Nikolaos Mavroeidis** – https://github.com/nikmauro
 
 * **Flags:** [flag-icons](https://github.com/lipis/flag-icons) by Panayiotis Lipiridis – MIT ([`dist/flags/LICENSE`](dist/flags/LICENSE)).
 * **Country names in other languages:** the browser's built-in [`Intl.DisplayNames`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames) (Unicode CLDR).
-* **Country list** (`dist/data.json`): country names, ISO 3166-1 alpha-2 codes and international calling codes.
+* **Country list:** ISO 3166-1 alpha-2 codes, English names from [Unicode CLDR](https://cldr.unicode.org/) (Unicode License V3), calling codes per ITU-T E.164 checked with [libphonenumber-js](https://github.com/catamphetamine/libphonenumber-js) (MIT) – generated by `npm run build:data`, see [`dist/data.LICENSE.md`](dist/data.LICENSE.md).
 
 ## 📄 License
 

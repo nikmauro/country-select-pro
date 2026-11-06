@@ -1,11 +1,11 @@
-/*! CountrySelect Pro v6.3.1 | MIT | https://github.com/nikmauro/country-select-pro */
+/*! CountrySelect Pro v6.4.0 | MIT | https://github.com/nikmauro/country-select-pro */
 /**
- * CountrySelect Pro v6.3.1
+ * CountrySelect Pro v6.4.0
  * ---------------------------------------------------------------------------
  * Vanilla JS country selector — zero dependencies
  * - Bootstrap 5 ή χωρίς framework: θέμα με CSS μεταβλητές --cs-* (fallback στις --bs-*, άρα και dark mode του Bootstrap)
  * - Αυτόματο init σε <input> / <select> με class .country-select (στατικό HTML, htmx, MutationObserver)
- * - Λίστα: ενσωματωμένη (data.json) ή δική σου — array / function, JSON inline, URL (ajax), <option> ενός <select>
+ * - Λίστα: ενσωματωμένη (μέσα στο JS — ISO 3166-1, Unicode CLDR, ITU-T E.164) ή δική σου — array / function, JSON inline, URL (ajax), <option> ενός <select>
  * - Πληκτρολόγιο + ARIA combobox / listbox · αναζήτηση χωρίς τόνους, με κωδικό χώρας ή κλήσης
  * - Ονόματα χωρών σε κάθε γλώσσα (Intl.DisplayNames — data-lang="el")
  * - Builds: country-select.js (script / CommonJS) · .min.js · .mjs (import) · .css (χωρίς <style> από το JS) · .d.ts
@@ -18,8 +18,9 @@
     if (typeof document === 'undefined') return;
     if (global.CountrySelect && global.CountrySelect.version) return; // ήδη φορτωμένο στη σελίδα — ένα αντίγραφο αρκεί
 
-    const VERSION = '6.3.1';
-    const DEFAULT_BASE_URL = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/';
+    const VERSION = '6.4.0';
+    // Μόνο για τις σημαίες (η λίστα είναι μέσα στο JS) — ίδια έκδοση στο npm
+    const DEFAULT_BASE_URL = 'https://cdn.jsdelivr.net/npm/country-select-pro@' + VERSION + '/';
 
     /* ---------------------------------------------------------------- βοηθητικά */
 
@@ -40,8 +41,270 @@
 
     const ARROW = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E\")";
 
+    const DIACRITICS = new RegExp('[' + String.fromCharCode(768) + '-' + String.fromCharCode(879) + ']', 'g'); // U+0300-U+036F: τόνοι / διακριτικά μετά το NFD
+    // Λίστα χωρών, μία ανά γραμμή: «CODE|Όνομα|κωδικός κλήσης|άλλα ονόματα; …» — χωρίς fetch
+    // Πηγές: ISO 3166-1 · Unicode CLDR (Unicode License V3) · ITU-T E.164 — dist/data.LICENSE.md · npm run build:data (scripts/build-data.js)
+    const DATA = /* DATA:START */ `
+AD|Andorra|376
+AE|United Arab Emirates|971
+AF|Afghanistan|93
+AG|Antigua and Barbuda|1
+AI|Anguilla|1
+AL|Albania|355
+AM|Armenia|374
+AO|Angola|244
+AQ|Antarctica|672
+AR|Argentina|54
+AS|American Samoa|1
+AT|Austria|43
+AU|Australia|61
+AW|Aruba|297
+AX|Åland Islands|358
+AZ|Azerbaijan|994
+BA|Bosnia and Herzegovina|387
+BB|Barbados|1
+BD|Bangladesh|880
+BE|Belgium|32
+BF|Burkina Faso|226
+BG|Bulgaria|359
+BH|Bahrain|973
+BI|Burundi|257
+BJ|Benin|229
+BL|Saint Barthélemy|590
+BM|Bermuda|1
+BN|Brunei|673|Brunei Darussalam
+BO|Bolivia|591|Bolivia, Plurinational State of
+BQ|Caribbean Netherlands|599
+BR|Brazil|55
+BS|Bahamas|1
+BT|Bhutan|975
+BV|Bouvet Island|
+BW|Botswana|267
+BY|Belarus|375
+BZ|Belize|501
+CA|Canada|1
+CC|Cocos (Keeling) Islands|61
+CD|DR Congo|243|Congo-Kinshasa; DRC
+CF|Central African Republic|236
+CG|Congo|242|Congo-Brazzaville
+CH|Switzerland|41
+CI|Côte d’Ivoire|225|Ivory Coast
+CK|Cook Islands|682
+CL|Chile|56
+CM|Cameroon|237
+CN|China|86
+CO|Colombia|57
+CR|Costa Rica|506
+CU|Cuba|53
+CV|Cape Verde|238|Cabo Verde
+CW|Curaçao|599
+CX|Christmas Island|61
+CY|Cyprus|357
+CZ|Czechia|420|Czech Republic
+DE|Germany|49
+DJ|Djibouti|253
+DK|Denmark|45
+DM|Dominica|1
+DO|Dominican Republic|1
+DZ|Algeria|213
+EC|Ecuador|593
+EE|Estonia|372
+EG|Egypt|20
+EH|Western Sahara|212
+ER|Eritrea|291
+ES|Spain|34
+ET|Ethiopia|251
+FI|Finland|358
+FJ|Fiji|679
+FK|Falkland Islands|500
+FM|Micronesia|691|Micronesia, Federated States of
+FO|Faroe Islands|298
+FR|France|33
+GA|Gabon|241
+GB|United Kingdom|44
+GD|Grenada|1
+GE|Georgia|995
+GF|French Guiana|594
+GG|Guernsey|44
+GH|Ghana|233
+GI|Gibraltar|350
+GL|Greenland|299
+GM|Gambia|220
+GN|Guinea|224
+GP|Guadeloupe|590
+GQ|Equatorial Guinea|240
+GR|Greece|30
+GS|South Georgia and the South Sandwich Islands|500|South Georgia
+GT|Guatemala|502
+GU|Guam|1
+GW|Guinea-Bissau|245
+GY|Guyana|592
+HK|Hong Kong|852
+HM|Heard and McDonald Islands|672|Heard Island and McDonald Islands
+HN|Honduras|504
+HR|Croatia|385
+HT|Haiti|509
+HU|Hungary|36
+ID|Indonesia|62
+IE|Ireland|353
+IL|Israel|972
+IM|Isle of Man|44
+IN|India|91
+IO|British Indian Ocean Territory|246
+IQ|Iraq|964
+IR|Iran|98|Iran, Islamic Republic of
+IS|Iceland|354
+IT|Italy|39
+JE|Jersey|44
+JM|Jamaica|1
+JO|Jordan|962
+JP|Japan|81
+KE|Kenya|254
+KG|Kyrgyzstan|996
+KH|Cambodia|855
+KI|Kiribati|686
+KM|Comoros|269
+KN|Saint Kitts and Nevis|1
+KP|North Korea|850|Korea, Democratic People's Republic of
+KR|South Korea|82|Korea, Republic of
+KW|Kuwait|965
+KY|Cayman Islands|1
+KZ|Kazakhstan|7
+LA|Laos|856|Lao People's Democratic Republic
+LB|Lebanon|961
+LC|Saint Lucia|1
+LI|Liechtenstein|423
+LK|Sri Lanka|94
+LR|Liberia|231
+LS|Lesotho|266
+LT|Lithuania|370
+LU|Luxembourg|352
+LV|Latvia|371
+LY|Libya|218
+MA|Morocco|212
+MC|Monaco|377
+MD|Moldova|373|Moldova, Republic of
+ME|Montenegro|382
+MF|Saint Martin|590
+MG|Madagascar|261
+MH|Marshall Islands|692
+MK|North Macedonia|389|Macedonia
+ML|Mali|223
+MM|Myanmar|95
+MN|Mongolia|976
+MO|Macao|853|Macau
+MP|Northern Mariana Islands|1
+MQ|Martinique|596
+MR|Mauritania|222
+MS|Montserrat|1
+MT|Malta|356
+MU|Mauritius|230
+MV|Maldives|960
+MW|Malawi|265
+MX|Mexico|52
+MY|Malaysia|60
+MZ|Mozambique|258
+NA|Namibia|264
+NC|New Caledonia|687
+NE|Niger|227
+NF|Norfolk Island|672
+NG|Nigeria|234
+NI|Nicaragua|505
+NL|Netherlands|31
+NO|Norway|47
+NP|Nepal|977
+NR|Nauru|674
+NU|Niue|683
+NZ|New Zealand|64
+OM|Oman|968
+PA|Panama|507
+PE|Peru|51
+PF|French Polynesia|689
+PG|Papua New Guinea|675
+PH|Philippines|63
+PK|Pakistan|92
+PL|Poland|48
+PM|Saint Pierre and Miquelon|508
+PN|Pitcairn Islands|64
+PR|Puerto Rico|1
+PS|Palestine|970
+PT|Portugal|351
+PW|Palau|680
+PY|Paraguay|595
+QA|Qatar|974
+RE|Réunion|262
+RO|Romania|40
+RS|Serbia|381
+RU|Russia|7|Russian Federation
+RW|Rwanda|250
+SA|Saudi Arabia|966
+SB|Solomon Islands|677
+SC|Seychelles|248
+SD|Sudan|249
+SE|Sweden|46
+SG|Singapore|65
+SH|Saint Helena|290|Saint Helena, Ascension and Tristan da Cunha
+SI|Slovenia|386
+SJ|Svalbard and Jan Mayen|47
+SK|Slovakia|421
+SL|Sierra Leone|232
+SM|San Marino|378
+SN|Senegal|221
+SO|Somalia|252
+SR|Suriname|597
+SS|South Sudan|211
+ST|São Tomé and Príncipe|239
+SV|El Salvador|503
+SX|Sint Maarten|1
+SY|Syria|963|Syrian Arab Republic
+SZ|Eswatini|268|Swaziland
+TC|Turks and Caicos Islands|1
+TD|Chad|235
+TF|French Southern Territories|262|French Southern and Antarctic Lands
+TG|Togo|228
+TH|Thailand|66
+TJ|Tajikistan|992
+TK|Tokelau|690
+TL|Timor-Leste|670|East Timor
+TM|Turkmenistan|993
+TN|Tunisia|216
+TO|Tonga|676
+TR|Türkiye|90|Turkey
+TT|Trinidad and Tobago|1
+TV|Tuvalu|688
+TW|Taiwan|886
+TZ|Tanzania|255|Tanzania, United Republic of
+UA|Ukraine|380
+UG|Uganda|256
+UM|U.S. Minor Outlying Islands|1|United States Minor Outlying Islands
+US|United States|1
+UY|Uruguay|598
+UZ|Uzbekistan|998
+VA|Vatican City|39|Holy See
+VC|Saint Vincent and the Grenadines|1
+VE|Venezuela|58|Venezuela, Bolivarian Republic of
+VG|British Virgin Islands|1
+VI|U.S. Virgin Islands|1|United States Virgin Islands
+VN|Vietnam|84
+VU|Vanuatu|678
+WF|Wallis and Futuna|681
+WS|Samoa|685
+XK|Kosovo|383
+YE|Yemen|967
+YT|Mayotte|262
+ZA|South Africa|27
+ZM|Zambia|260
+ZW|Zimbabwe|263
+` /* DATA:END */;
+
+    let baseCache = null;
+    const baseList = () => baseCache || (baseCache = DATA.trim().split('\n').map((line) => {
+        const p = line.split('|');
+        return {code: p[0], nameEn: p[1], phone: p[2] ? '+' + p[2] : '', alt: p[3] ? p[3].split('; ') : []};
+    }));
+
     const str = (v) => (v == null ? '' : String(v));
-    const norm = (s) => str(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); // χωρίς τόνους / διακριτικά
+    const norm = (s) => str(s).normalize('NFD').replace(DIACRITICS, '').toLowerCase().trim(); // χωρίς τόνους / διακριτικά
     const esc = (s) => str(s).replace(/[&<>"']/g, (ch) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
     const codeList = (v) => (Array.isArray(v) ? v : str(v).split(',')).map((c) => str(c).trim().toUpperCase()).filter(Boolean);
     const yes = (v, def) => (v == null || v === '' ? def : !(v === false || v === 'false' || v === '0' || v === 'no'));
@@ -427,8 +690,9 @@
             }
         }
 
+        /** Η ενσωματωμένη λίστα (DATA) — αντίγραφο ανά instance, χωρίς fetch */
         _base() {
-            return fetchJSON(this.baseUrl + 'dist/data.json').then((json) => toArray(json).map(toItem).filter((it) => it && it.code));
+            return Promise.resolve(baseList().map((it) => Object.assign({}, it)));
         }
 
         async _getItems() {
@@ -451,7 +715,7 @@
                 custom = toArray(await src);
             }
 
-            if (!custom) return (await this._base()).map((it) => Object.assign({}, it));
+            if (!custom) return this._base();
 
             const items = custom.map(toItem).filter(Boolean);
             // Ό,τι λείπει (όνομα / κωδικός κλήσης) από την ενσωματωμένη λίστα — μόνο όταν χρειάζεται
@@ -465,6 +729,7 @@
                     if (!b) return;
                     if (!it.nameEn) it.nameEn = b.nameEn;
                     if (!it.phone) it.phone = b.phone;
+                    if (!it.alt) it.alt = b.alt;
                 });
             }
             items.forEach((it) => {
@@ -482,6 +747,8 @@
             const only = this.onlyCodes, excl = this.excludeCodes, pref = this.preferredCodes;
             let list = items
                 .filter((it) => (!only.length || only.includes(it.code)) && !excl.includes(it.code))
+                // κωδικός κλήσης ως τιμή → μόνο όσες έχουν (π.χ. όχι το ακατοίκητο Bouvet Island)
+                .filter((it) => this.valueType !== 'phone' || it.phone || it.value != null)
                 .map((it) => {
                     let name = it.nameEn;
                     if (names && it.code && !it.fixedName) {
@@ -493,9 +760,9 @@
                             : isFlagCode(it.code) ? this.flagPath.split('{code}').join(it.code.toLowerCase()).split('{CODE}').join(it.code) : '';
                     }
                     return {
-                        code: it.code, name, nameEn: it.nameEn, phone: it.phone || '', flag, value: it.value,
+                        code: it.code, name, nameEn: it.nameEn, phone: it.phone || '', flag, value: it.value, alt: it.alt || [],
                         isPreferred: !!it.code && pref.includes(it.code),
-                        _search: norm([name, it.nameEn, it.code, ALIASES[it.code], it.keywords].join(' '))
+                        _search: norm([name, it.nameEn, it.code, ALIASES[it.code], it.keywords].concat(it.alt || []).join(' '))
                     };
                 });
             if (this.sort) list.sort((a, b) => (collator ? collator.compare(a.name, b.name) : a.name.localeCompare(b.name)));
@@ -531,7 +798,8 @@
             }
             if (this.valueType === 'name') {
                 const n = norm(v);
-                return list.find((c) => norm(c.nameEn) === n || norm(c.name) === n) || null;
+                // + άλλα / παλιότερα ονόματα (Turkey → Türkiye, Ivory Coast → Côte d’Ivoire …)
+                return list.find((c) => norm(c.nameEn) === n || norm(c.name) === n) || list.find((c) => c.alt.some((a) => norm(a) === n)) || null;
             }
             const up = v.toUpperCase();
             return list.find((c) => c.code === up) || list.find((c) => c.value != null && c.value.toUpperCase() === up) || null;
