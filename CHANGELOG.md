@@ -4,6 +4,9 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 ## [Unreleased]
 
+### Fixed
+- Screen-reader result count in the singular: "1 result" / "1 αποτέλεσμα" (was "1 results"); new text option `result`.
+
 ### Development
 - **Automated tests** with Playwright on Chromium, Firefox and WebKit plus the minified build: keyboard (Enter with preferred countries, Escape, typing), ARIA and axe-core accessibility scan, search (accents, former names, calling codes), values and events, custom lists, `<select>`, htmx swap / morph (no flash, server error message kept) / clone / history copy, CSS file under a strict CSP, ES module, built-in country list.
 - **GitHub Actions CI**: build, TypeScript check and all tests on every push and pull request.

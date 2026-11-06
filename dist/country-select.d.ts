@@ -72,6 +72,8 @@ export interface CountrySelectOptions {
     loadError?: string;
     /** Screen-reader result count, `{n}` = number. */
     results?: string;
+    /** The same for exactly one result, e.g. "{n} result". */
+    result?: string;
     /** Accessible name of the list when the input has no label. */
     listLabel?: string;
     /** Visible rows. Default 5. `data-country-row-values` */

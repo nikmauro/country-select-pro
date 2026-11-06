@@ -39,7 +39,7 @@ test('typed search highlights the first match and announces the count', async ({
     await expect(w.locator('.cs-search-input')).toBeFocused();
     await page.keyboard.type('cura');
     await expect(w.locator('.cs-option.active')).toHaveText('Curaçao');
-    await expect(w.locator('.cs-sr-only')).toHaveText(/^1 results?$/);
+    await expect(w.locator('.cs-sr-only')).toHaveText('1 result'); // ενικός
     await page.keyboard.press('Enter');
     expect(await page.inputValue('#plain')).toBe('CW');
 });

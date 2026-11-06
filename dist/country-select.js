@@ -25,8 +25,8 @@
     /* ---------------------------------------------------------------- βοηθητικά */
 
     const I18N = {
-        en: {placeholder: 'Select', searchPlaceholder: 'Search...', noResults: 'Not found', loading: 'Loading...', loadError: 'Could not load the list', results: '{n} results', listLabel: 'Countries'},
-        el: {placeholder: 'Επιλέξτε', searchPlaceholder: 'Αναζήτηση...', noResults: 'Δεν βρέθηκε', loading: 'Φόρτωση...', loadError: 'Η λίστα δεν φορτώθηκε', results: '{n} αποτελέσματα', listLabel: 'Χώρες'}
+        en: {placeholder: 'Select', searchPlaceholder: 'Search...', noResults: 'Not found', loading: 'Loading...', loadError: 'Could not load the list', results: '{n} results', result: '{n} result', listLabel: 'Countries'},
+        el: {placeholder: 'Επιλέξτε', searchPlaceholder: 'Αναζήτηση...', noResults: 'Δεν βρέθηκε', loading: 'Φόρτωση...', loadError: 'Η λίστα δεν φορτώθηκε', results: '{n} αποτελέσματα', result: '{n} αποτέλεσμα', listLabel: 'Χώρες'}
     };
 
     // Κωδικός κλήσης κοινός σε πολλές χώρες → ποια εννοεί μια τιμή που είναι μόνο ο κωδικός (+1 = ΗΠΑ, όχι American Samoa)
@@ -961,7 +961,7 @@ ZW|Zimbabwe|263
             this._renderOptions();
             this.listEl.scrollTop = 0;
             this._updateActive();
-            this._announce(term ? this.config.results.replace('{n}', res.length) : '');
+            this._announce(term ? (res.length === 1 ? this.config.result : this.config.results).replace('{n}', res.length) : '');
         }
 
         _move(i) {
