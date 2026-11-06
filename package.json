@@ -1,6 +1,6 @@
 {
   "name": "country-select-pro",
-  "version": "6.5.0",
+  "version": "6.6.0",
   "description": "Lightweight, zero-dependency vanilla JS country selector: flags, phone codes, search, custom lists, ARIA, Bootstrap 5 or plain CSS.",
   "main": "dist/country-select.js",
   "module": "dist/country-select.mjs",
