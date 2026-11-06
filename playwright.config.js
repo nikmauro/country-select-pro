@@ -2,6 +2,8 @@
 const {defineConfig, devices} = require('@playwright/test');
 
 const PORT = 4173;
+// PW_CHROME_CHANNEL=chrome → το Google Chrome του συστήματος αντί για το Chromium του Playwright (release: χωρίς κατέβασμα / apt-get)
+const CHROME = process.env.PW_CHROME_CHANNEL ? {channel: process.env.PW_CHROME_CHANNEL} : {};
 
 module.exports = defineConfig({
     testDir: 'test/e2e',
@@ -23,10 +25,10 @@ module.exports = defineConfig({
     },
     projects: [
         // metadata.build: ποιο αρχείο φορτώνουν τα fixtures (src = dist/country-select.js, min = dist/country-select.min.js)
-        {name: 'chromium', use: {...devices['Desktop Chrome']}, metadata: {build: 'src'}},
+        {name: 'chromium', use: {...devices['Desktop Chrome'], ...CHROME}, metadata: {build: 'src'}},
         {name: 'firefox', use: {...devices['Desktop Firefox']}, metadata: {build: 'src'}, testIgnore: /data.spec/},
         {name: 'webkit', use: {...devices['Desktop Safari']}, metadata: {build: 'src'}, testIgnore: /data.spec/},
         // το minified: τα tests συμπεριφοράς (όχι λίστα / builds / axe, που δεν εξαρτώνται από το minification)
-        {name: 'chromium-min', use: {...devices['Desktop Chrome']}, metadata: {build: 'min'}, testIgnore: /(data|builds|a11y).spec/}
+        {name: 'chromium-min', use: {...devices['Desktop Chrome'], ...CHROME}, metadata: {build: 'min'}, testIgnore: /(data|builds|a11y).spec/}
     ]
 });
