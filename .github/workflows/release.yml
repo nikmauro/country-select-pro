@@ -3,11 +3,12 @@
 #   npm version patch          # ή minor / major — ο αριθμός παντού + CHANGELOG, commit + tag
 #   git push --follow-tags
 #
-# Χειροκίνητα (Actions → Release → Run workflow): ένα υπάρχον tag — dry run (χωρίς δημοσίευση),
-# ή GitHub Release για παλιό tag (το npm publish παραλείπεται όταν η έκδοση υπάρχει ήδη στο npm).
+# Χειροκίνητα (Actions → Release → Run workflow) για ένα υπάρχον tag:
+#   - dry run: build, tests και pack, χωρίς δημοσίευση
+#   - έκδοση που υπάρχει ήδη στο npm: μόνο το GitHub Release (σημειώσεις από το CHANGELOG του main)
 #
 # Μία φορά στο npmjs.com: country-select-pro → Settings → Trusted Publisher → GitHub Actions:
-#   nikmauro / country-select-pro / release.yml
+#   nikmauro / country-select-pro / release.yml (Allow npm publish)
 name: Release
 
 on:
@@ -39,20 +40,39 @@ jobs:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      # push tag → ο κώδικας του tag · χειροκίνητα → το main (CHANGELOG / scripts), το tag παρακάτω
+      - uses: actions/checkout@v7
         with:
-          ref: refs/tags/${{ github.event.inputs.tag || github.ref_name }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
+      - name: Already on npm?
+        id: npm
+        run: |
+          if npm view "country-select-pro@$TAG" version > /dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "country-select-pro@$TAG is already on npm – GitHub Release only"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Release notes (CHANGELOG)
+        run: node scripts/release-notes.js "$TAG" > "$RUNNER_TEMP/notes.md" && cat "$RUNNER_TEMP/notes.md"
+
+      - name: Check out the tag
+        if: steps.npm.outputs.published == 'false'
+        run: git checkout --quiet "refs/tags/$TAG"
+
       - name: npm with Trusted Publishing (>= 11.5.1)
+        if: steps.npm.outputs.published == 'false'
         run: npm install -g npm@^11.5.1 && npm --version
 
       - name: Same version in tag, package.json and source
+        if: steps.npm.outputs.published == 'false'
         run: |
           PKG=$(node -p "require('./package.json').version")
           SRC=$(node -p "require('fs').readFileSync('dist/country-select.js','utf8').match(/const VERSION = '([^']+)'/)[1]")
@@ -60,30 +80,31 @@ jobs:
           test "$TAG" = "$PKG" && test "$TAG" = "$SRC"
 
       - name: Install
+        if: steps.npm.outputs.published == 'false'
         run: npm install --no-audit --no-fund
 
       - name: Build
+        if: steps.npm.outputs.published == 'false'
         run: npm run build
 
       - name: TypeScript types
+        if: steps.npm.outputs.published == 'false'
         run: npm run check:types
 
       # Όλοι οι browsers ελέγχονται από το CI σε κάθε push (ίδιος κώδικας). Εδώ μόνο Chromium, ΧΩΡΙΣ πακέτα Linux (--with-deps / apt-get,
-      # που μπορεί να αργήσει πολύ): ο runner έχει ήδη το Google Chrome και τις βιβλιοθήκες του. Δουλεύει και για παλιά tags.
+      # που μπορεί να αργήσει πολύ): ο runner έχει ήδη το Google Chrome και τις βιβλιοθήκες του.
       - name: Playwright Chromium (no system packages)
+        if: steps.npm.outputs.published == 'false'
         run: npx playwright install chromium
 
       - name: Tests (Chromium, source + minified)
+        if: steps.npm.outputs.published == 'false'
         run: npx playwright test --project=chromium --project=chromium-min
 
-      - name: Release notes (CHANGELOG)
-        run: node scripts/release-notes.js "$TAG" > "$RUNNER_TEMP/notes.md" && cat "$RUNNER_TEMP/notes.md"
-
       - name: npm publish
+        if: steps.npm.outputs.published == 'false'
         run: |
-          if npm view "country-select-pro@$TAG" version > /dev/null 2>&1; then
-            echo "country-select-pro@$TAG is already on npm – skip"
-          elif [ "$DRY_RUN" = "true" ]; then
+          if [ "$DRY_RUN" = "true" ]; then
             npm publish --dry-run
           else
             npm publish --provenance --access public
@@ -104,7 +125,7 @@ jobs:
 
       - name: Test report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
