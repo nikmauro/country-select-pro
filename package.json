@@ -1,10 +1,10 @@
 {
   "name": "country-select-pro",
-  "version": "6.1.4",
-  "description": "A lightweight, zero-dependency, vanilla JavaScript country selector with localized browser validation and Bootstrap 5 integration.",
+  "version": "6.2.0",
+  "description": "Lightweight, zero-dependency vanilla JS country selector: flags, phone codes, search, custom lists, ARIA, Bootstrap 5 or plain CSS.",
   "main": "dist/country-select.js",
-  "jsdelivr": "dist/country-select.js",
-  "unpkg": "dist/country-select.js",
+  "jsdelivr": "dist/country-select.min.js",
+  "unpkg": "dist/country-select.min.js",
   "browser": "dist/country-select.js",
   "exports": {
     ".": "./dist/country-select.js"
@@ -14,18 +14,24 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/nikmauro/country-select-pro.git"
+    "url": "git+https://github.com/nikmauro/country-select-pro.git"
   },
   "keywords": [
     "country",
+    "country-select",
+    "country-picker",
     "dropdown",
     "flags",
+    "phone-code",
     "select",
-    "international",
+    "bootstrap",
+    "htmx",
+    "accessible",
     "vanilla-js"
   ],
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
+    "prepublishOnly": "npm run build"
   },
   "author": "Nikolaos Mavroidis",
   "license": "MIT",

@@ -100,7 +100,7 @@
                 <div class="code-box">
 
                     &lt;script
-                    src="https://cdn.jsdelivr.net/npm/country-select-pro@6.1.3/dist/country-select.min.js"&gt;&lt;/script&gt;
+                    src="https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js" defer&gt;&lt;/script&gt;
 
                 </div>
 
@@ -178,6 +178,55 @@
                 </div>
 
 
+                <!-- DEMO 4 -->
+
+                <div class="demo-card">
+
+                    <div class="section-title">&lt;select&gt; — your own list, works without JavaScript</div>
+
+                    <select class="country-select form-select" name="shipping" required>
+                        <option value="">Choose shipping country</option>
+                        <option value="GR">Greece (1-2 days)</option>
+                        <option value="CY">Cyprus (3-4 days)</option>
+                        <option value="DE">Germany (4-6 days)</option>
+                        <option value="IT">Italy (4-6 days)</option>
+                    </select>
+
+                </div>
+
+
+                <!-- DEMO 5 -->
+
+                <div class="demo-card">
+
+                    <div class="section-title">Localized names (data-lang="el") + accent-insensitive search</div>
+
+                    <input
+                            type="text"
+                            class="country-select form-control"
+                            name="country_el"
+                            value="GR"
+                            data-lang="el"
+                            data-preferred="GR,CY">
+
+                </div>
+
+
+                <!-- DEMO 6 -->
+
+                <div class="demo-card" data-bs-theme="dark" style="background:#212529">
+
+                    <div class="section-title">Bootstrap dark mode (data-bs-theme="dark")</div>
+
+                    <input
+                            type="text"
+                            class="country-select"
+                            name="country_dark"
+                            value="NL">
+
+                </div>
+
+
                 <div class="text-center">
 
                     <button type="submit" class="btn btn-primary btn-lg px-5">
@@ -207,10 +256,12 @@
                 <ul>
 
                     <li>🚀 Zero dependencies</li>
-                    <li>⚡ Less than 4KB minified</li>
-                    <li>🔍 Built-in search</li>
-                    <li>📱 Mobile friendly</li>
-                    <li>🎨 Bootstrap compatible</li>
+                    <li>🎨 Bootstrap 5 (and dark mode) or plain CSS with <code>--cs-*</code> variables</li>
+                    <li>📋 Built-in list or your own: array, JSON, URL, &lt;select&gt;</li>
+                    <li>🔍 Accent-insensitive search by name, ISO or phone code</li>
+                    <li>🌐 Country names in any language</li>
+                    <li>♿ Keyboard &amp; screen reader accessible</li>
+                    <li>🔁 htmx ready</li>
 
                 </ul>
 
@@ -225,12 +276,12 @@
 
                 <div class="code-box">
 
-                    &lt;input id="country"&gt;
+                    &lt;input class="country-select" name="country" value="GR"&gt;<br><br>
 
-                    &lt;script&gt;
-                    new CountrySelect("#country", {
-                    defaultCountry: "gr"
-                    });
+                    &lt;!-- or with JavaScript --&gt;<br>
+                    &lt;input id="country" name="country"&gt;<br>
+                    &lt;script&gt;<br>
+                    &nbsp;&nbsp;new CountrySelect("#country", { defaultCountry: "GR", preferredCountries: ["GR", "CY"] });<br>
                     &lt;/script&gt;
 
                 </div>

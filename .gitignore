@@ -1,1 +1,3 @@
 /node_modules/
+# build του gulp (npm run build) — μπαίνει στο npm, όχι στο git
+/dist/country-select.min.js

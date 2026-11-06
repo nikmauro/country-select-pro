@@ -1,182 +1,243 @@
 # CountrySelect Pro 🌍
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![jsDelivr](https://data.jsdelivr.com/v1/package/gh/nikmauro/country-select-pro/badge)](https://www.jsdelivr.com/package/gh/nikmauro/country-select-pro)
+[![npm](https://img.shields.io/npm/v/country-select-pro)](https://www.npmjs.com/package/country-select-pro)
+[![jsDelivr](https://data.jsdelivr.com/v1/package/npm/country-select-pro/badge)](https://www.jsdelivr.com/package/npm/country-select-pro)
 ![Vanilla JS](https://img.shields.io/badge/Vanilla-JavaScript-yellow)
-![Size](https://img.shields.io/badge/size-%3C4KB-brightgreen)
+![Size](https://img.shields.io/badge/gzip-~7KB-brightgreen)
 
-A **lightweight, zero-dependency, vanilla JavaScript country selector** with localized browser validation and **Bootstrap 5 integration**.
-
-CountrySelect Pro provides a clean and fast country dropdown with **search, phone codes, accessibility support and smart browser validation**, without requiring jQuery or any external framework.
+A **lightweight, zero-dependency, vanilla JavaScript country selector** with flags, phone codes, search, keyboard and screen-reader support. Works with **Bootstrap 5** (including dark mode) or **without any framework**.
 
 ---
 
-# ✨ Features
+## ✨ Features
 
-* 🚀 **Zero Dependencies** – No jQuery, no frameworks.
-* ⚡ **Ultra Lightweight** – Less than **4KB minified**.
-* 🎨 **Bootstrap 5 Ready** – Seamless integration with `input-group`.
-* 🔍 **Built-in Search** – Quickly filter countries and phone codes.
-* 🛡️ **Smart Validation** – Uses native browser localized validation messages.
-* 📱 **Responsive UI** – Works perfectly on mobile and desktop.
-* ⌨️ **Keyboard Accessible** – Fully navigable with keyboard.
-* 🌐 **International Ready** – Supports ISO country codes.
+* 🚀 **Zero dependencies** – no jQuery, no framework.
+* 🎨 **Bootstrap 5 or plain CSS** – themable with `--cs-*` CSS variables, follows Bootstrap's `--bs-*` variables (and `data-bs-theme="dark"`) automatically.
+* 📋 **Any list** – built-in list of 250 countries, or your own: array, inline JSON, URL (ajax), or the `<option>`s of a `<select>`.
+* 🔍 **Smart search** – accent-insensitive (`cote` → Côte…, `ελλαδα` → Ελλάδα), by name, ISO code or phone code, best matches first.
+* 🌐 **Localized names** – country names in any language via `Intl.DisplayNames` (`data-lang="el"`).
+* ♿ **Accessible** – ARIA combobox / listbox, full keyboard support, live result count, forced-colors and reduced-motion support.
+* ⚡ **SEO & performance friendly** – progressive enhancement with `<select>`, one shared data request per page, lazy flags with fixed size (no layout shift), self-hosting option.
+* 🔁 **htmx ready** – auto-init on swapped / morphed / cloned content.
 
 ---
 
-# 🎮 Live Demo
-
-Try the interactive demo:
+## 🎮 Live Demo
 
 https://nikmauro.github.io/country-select-pro/docs/
 
 ---
 
-# 📦 Installation
+## 📦 Installation
 
-## CDN (Recommended)
-
-Include the script via **jsDelivr**:
+### CDN
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.1.4/dist/country-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js" defer></script>
 ```
 
----
+### npm
 
-## Local Installation
-
-Download the repository and include:
-
-```html
-<script src="dist/country-select.js"></script>
-```
-
----
-
-# 🚀 Basic Usage
-
-```html
-<input id="country" class="form-control">
-
-<script>
-const countrySelect = new CountrySelect("#country", {
-  defaultCountry: "gr"
-});
-</script>
-```
-
----
-
-# ⚙️ Options
-
-| Option               | Type    | Description                         |
-| -------------------- | ------- | ----------------------------------- |
-| `defaultCountry`     | string  | Default selected country (ISO code) |
-| `preferredCountries` | array   | Countries displayed first           |
-| `onlyCountries`      | array   | Restrict selectable countries       |
-| `search`             | boolean | Enable / disable search             |
-| `placeholder`        | string  | Custom placeholder text             |
-
-Example:
-
-```javascript
-new CountrySelect("#country", {
-  defaultCountry: "gr",
-  preferredCountries: ["gr", "cy", "de"],
-  search: true
-});
-```
-
----
-
-# 🧩 Bootstrap 5 Example
-
-CountrySelect works perfectly with Bootstrap input groups.
-
-```html
-<div class="input-group">
-  <span class="input-group-text">🌍</span>
-  <input id="country" class="form-control">
-</div>
+```bash
+npm install country-select-pro
 ```
 
 ```javascript
-new CountrySelect("#country");
+import 'country-select-pro'; // auto-init + window.CountrySelect
 ```
 
 ---
 
-# 🌐 Browser Support
+## 🚀 Usage
 
-Compatible with all modern browsers:
+Add the class `country-select` – that's it. The value of the input is the ISO code (or phone code / name, see `data-value-type`).
 
-* Chrome
-* Firefox
-* Safari
-* Edge
-* Mobile browsers (iOS / Android)
+```html
+<input type="text" class="country-select" name="country" value="GR">
 
-No polyfills required.
-
----
-
-# 📂 Project Structure
-
-```
-country-select-pro
-│
-├─ dist
-│   ├─ country-select.js
-│   └─ data.json
-├─ flags
-├─ demo
-├─ src
-└─ README.md
+<!-- phone code -->
+<input type="text" class="country-select" name="phone_code" value="+30"
+       data-value-type="phone" data-schema-return="{img} {phone}">
 ```
 
+### Progressive enhancement with `<select>` (recommended for SEO / no-JS)
+
+The list stays in your HTML: it works without JavaScript and the options are your own list.
+
+```html
+<select class="country-select" name="shipping_country" required>
+  <option value="">Choose a country</option>
+  <option value="GR">Greece</option>
+  <option value="CY" selected>Cyprus</option>
+  <option value="DE">Germany</option>
+</select>
+```
+
+Optional per option: `data-code`, `data-phone`, `data-flag` (image URL). An empty option text takes the name from the built-in list.
+
+### JavaScript
+
+```javascript
+const cs = new CountrySelect('#country', {
+  defaultCountry: 'GR',
+  preferredCountries: ['GR', 'CY'],
+  lang: 'el'
+});
+
+cs.ready.then(() => console.log(cs.getCountry()));
+```
+
+Elements with the `country-select` class are initialized automatically; calling `new CountrySelect()` with options on such an element re-creates it with those options.
+
 ---
 
-# 🧠 Why CountrySelect Pro?
+## ⚙️ Options
 
-Many country dropdown libraries rely on **large frameworks like jQuery or heavy UI components**.
+Every option can be set as a `data-*` attribute or as a JavaScript option (JS wins).
 
-CountrySelect Pro was built to be:
-
-* **Tiny**
-* **Fast**
-* **Dependency-free**
-* **Easy to integrate**
-
-Perfect for:
-
-* checkout forms
-* registration forms
-* shipping address forms
-* phone number inputs
-* international forms
+| Attribute | JS option | Default | Description |
+| --- | --- | --- | --- |
+| `data-value-type` | `valueType` | `code` | Value written to the input: `code` (ISO), `phone` (`+30`) or `name` |
+| `data-schema` | `schema` | `{img} {name}` | Template of the list items: `{img}` `{name}` `{code}` `{phone}` |
+| `data-schema-return` | `schemaReturn` | = schema | Template of the selected value |
+| `data-preferred` | `preferredCountries` | – | Codes shown first, e.g. `"GR,CY"` |
+| `data-only-countries` | `onlyCountries` | – | Show only these codes |
+| `data-exclude-countries` | `excludeCountries` | – | Hide these codes |
+| `data-default-country` | `defaultCountry` | – | ISO code selected when the input is empty |
+| `data-placeholder` | `placeholder` | `Select` | Text when nothing is selected |
+| `data-country-search` | `search` | `true` | Search box in the list |
+| `data-search-placeholder` | `searchPlaceholder` | `Search...` | |
+| `data-no-results` | `noResults` | `Not found` | |
+| `data-country-row-values` | `rows` | `5` | Visible rows |
+| `data-dropdown-width` | `dropdownWidth` | `auto` | e.g. `300px` |
+| `data-lang` | `lang` | – | Country names & texts language (`el`, `de`, … or `auto` = `<html lang>`) |
+| `data-flags` | `flags` | `true` | `false` = no flags |
+| `data-sort` | `sort` | `true` | `false` = keep the order of your list |
+| `data-countries` | `countries` | – | Your list (see below) |
+| `data-src` | `dataUrl` | – | URL of your list (JSON) |
+| `data-base-url` | `baseUrl` | jsDelivr | Where `dist/data.json` and `dist/flags/` live (self-hosting) |
+| `data-flag-path` | `flagPath` | `{baseUrl}dist/flags/4x3/{code}.svg` | Flag URL template (`{code}` = `gr`, `{CODE}` = `GR`) |
+| – | `fetchOptions` | – | `fetch()` options for `dataUrl` |
+| – | `merge` | `true` | Fill missing names / phone codes of your list from the built-in list |
 
 ---
 
-# 🤝 Contributing
+## 📋 Custom lists
 
-Contributions are welcome.
+```html
+<!-- codes only: names, flags and phone codes come from the built-in list -->
+<input class="country-select" data-countries='["GR","CY","IT"]'>
+
+<!-- your own items -->
+<input class="country-select" data-countries='[{"code":"GR","name":"Greece – 2 days"},{"value":"PICKUP","name":"Store pickup","flag":false}]'>
+
+<!-- from your server (ajax) -->
+<input class="country-select" data-src="/api/shipping-countries.json">
+```
+
+```javascript
+new CountrySelect(el, {countries: () => fetch('/api/countries').then(r => r.json())});
+cs.setCountries(['GR', 'CY']); // replace the list later
+```
+
+Accepted formats: an array of codes or objects, `{countries: [...]}`, `{data: [...]}`, `{"GR": "Greece", ...}` or the built-in `data.json` format. Item fields: `code` (`iso2`, `alpha2`), `name` (`label`, `text`), `phone` (`dial_code`), `flag` (URL or `false`), `value` (custom value), `keywords` (extra search words).
+
+---
+
+## 📡 Events & methods
+
+```javascript
+input.addEventListener('country-change', e => {
+  console.log(e.detail.value, e.detail.country); // {code, name, localName, phone, value}
+});
+```
+
+`change` and `input` are dispatched too, so `hx-trigger="change"` / `hx-trigger="country-change"` work.
+
+| Method | |
+| --- | --- |
+| `CountrySelect.getInstance(el)` | Instance of an element |
+| `CountrySelect.init(root)` | Initialize `.country-select` inside `root` |
+| `cs.setValue('CY', {silent})` | Select by value (sends events unless `silent`) |
+| `cs.getValue()` / `cs.getCountry()` | Current value / country |
+| `cs.open()` / `cs.close()` / `cs.toggle()` | |
+| `cs.setCountries(list)` | New list (array, function, JSON, URL) |
+| `cs.refresh()` | Re-read the input value after `input.value = ...` |
+| `cs.destroy()` | Remove the widget, restore the input |
+| `cs.ready` | Promise, resolved when the list is loaded |
+
+---
+
+## 🎨 Styling
+
+**Bootstrap 5:** nothing to do – colors, radius, focus ring and dark mode (`data-bs-theme="dark"`) follow Bootstrap's variables. Works inside `.input-group`, with `.is-invalid` and `.was-validated`.
+
+**Without a framework:** set the `--cs-*` variables on any parent (or `:root`):
+
+```css
+.my-form {
+  --cs-bg: #fff;  --cs-color: #222;  --cs-border-color: #ccc;  --cs-radius: 4px;
+  --cs-active-bg: #e07a2f;  --cs-active-color: #fff;  --cs-hover-bg: #f3f3f3;
+  --cs-focus-border: #e07a2f;  --cs-focus-ring: rgba(224, 122, 47, .3);
+  /* also: --cs-font-size --cs-muted --cs-search-bg --cs-dropdown-bg --cs-dropdown-border-color
+           --cs-divider-color --cs-invalid --cs-disabled-bg --cs-shadow --cs-z-index */
+}
+```
+
+**Your own CSS only:** `window.CountrySelectConfig = {css: false}` before the script – class names: `.cs-wrapper .cs-trigger .cs-selected-content .cs-dropdown .cs-search-input .cs-list .cs-option(.active) .cs-divider`.
+
+### Global configuration
+
+```html
+<script>window.CountrySelectConfig = {lang: 'el', preferredCountries: ['GR', 'CY'], baseUrl: '/vendor/country-select-pro/'};</script>
+<script src=".../country-select.min.js" defer></script>
+```
+
+Any option can be a default here, plus `css: false` and `autoInit: false`.
+
+---
+
+## ♿ Accessibility
+
+* ARIA 1.2 combobox / listbox pattern (`aria-expanded`, `aria-activedescendant`, `aria-selected`), label taken from `aria-label`, `aria-labelledby` or `<label for>`.
+* Keyboard: <kbd>↓</kbd> <kbd>↑</kbd> <kbd>Enter</kbd> <kbd>Space</kbd> open, <kbd>Home</kbd> <kbd>End</kbd> <kbd>PgUp</kbd> <kbd>PgDn</kbd> move, typing a letter opens the search, <kbd>Esc</kbd> closes (without closing a surrounding modal), <kbd>Tab</kbd> leaves.
+* Result count announced to screen readers, WCAG AA contrast, `forced-colors` (Windows high contrast) and `prefers-reduced-motion` support, disabled / readonly states.
+
+## 🔎 SEO & performance
+
+* Use a `<select>` (or an input with a value) – the content is in the HTML and works without JavaScript.
+* One request for the built-in list per page, no matter how many selectors.
+* Flags are lazy-loaded, async-decoded and have a fixed size (no layout shift / CLS).
+* Self-host the data and flags with `baseUrl` / `flagPath` to avoid third-party requests.
+
+---
+
+## 🌐 Browser support
+
+All modern browsers (Chrome, Edge, Firefox, Safari, iOS, Android). No polyfills required.
+
+## 📂 Project structure
+
+```
+dist/
+├─ country-select.js        source (also the unminified build)
+├─ country-select.min.js    built by `npm run build` (published to npm, not in git)
+├─ data.json                countries: names, ISO codes, phone codes
+└─ flags/                   SVG flags (4x3, 1x1)
+docs/index.html             live demo
+```
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Submit a Pull Request
 
----
+## 👨‍💻 Author
 
-# 👨‍💻 Author
+Developed by **Nikolaos Mavroeidis** – https://github.com/nikmauro
 
-Developed by **Nikolaos Mavroeidis**
-GitHub: https://github.com/nikmauro
+## 📄 License
 
----
-
-# 📄 License
-
-MIT License
-
-Feel free to use it in personal and commercial projects.
+MIT – free for personal and commercial projects.
