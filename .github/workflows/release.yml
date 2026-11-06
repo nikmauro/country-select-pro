@@ -34,7 +34,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
@@ -68,11 +68,12 @@ jobs:
       - name: TypeScript types
         run: npm run check:types
 
-      - name: Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+      # Όλοι οι browsers ελέγχονται από το CI σε κάθε push (ίδιος κώδικας) — εδώ μόνο Chromium (λιγότερα πακέτα Linux, γρήγορο release)
+      - name: Playwright browser (Chromium)
+        run: npx playwright install --with-deps chromium
 
-      - name: Tests
-        run: npx playwright test
+      - name: Tests (Chromium, source + minified)
+        run: npx playwright test --project=chromium --project=chromium-min
 
       - name: Release notes (CHANGELOG)
         run: node scripts/release-notes.js "$TAG" > "$RUNNER_TEMP/notes.md" && cat "$RUNNER_TEMP/notes.md"
