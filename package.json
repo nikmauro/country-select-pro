@@ -1,13 +1,23 @@
 {
   "name": "country-select-pro",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "Lightweight, zero-dependency vanilla JS country selector: flags, phone codes, search, custom lists, ARIA, Bootstrap 5 or plain CSS.",
   "main": "dist/country-select.js",
+  "module": "dist/country-select.mjs",
+  "types": "dist/country-select.d.ts",
+  "style": "dist/country-select.css",
   "jsdelivr": "dist/country-select.min.js",
   "unpkg": "dist/country-select.min.js",
-  "browser": "dist/country-select.js",
   "exports": {
-    ".": "./dist/country-select.js"
+    ".": {
+      "types": "./dist/country-select.d.ts",
+      "import": "./dist/country-select.mjs",
+      "require": "./dist/country-select.js",
+      "default": "./dist/country-select.js"
+    },
+    "./css": "./dist/country-select.css",
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
@@ -31,6 +41,7 @@
   ],
   "scripts": {
     "build": "gulp build",
+    "check:types": "tsc -p test/tsconfig.json",
     "prepublishOnly": "npm run build"
   },
   "author": "Nikolaos Mavroidis",
@@ -43,6 +54,8 @@
     "gulp": "^5.0.1",
     "gulp-cli": "^3.1.0",
     "gulp-rename": "^2.1.0",
-    "gulp-terser": "^2.1.0"
-  }
+    "gulp-terser": "^2.1.0",
+    "typescript": "^5.9.3"
+  },
+  "sideEffects": true
 }

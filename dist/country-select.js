@@ -1,6 +1,6 @@
-/*! CountrySelect Pro v6.2.0 | MIT | https://github.com/nikmauro/country-select-pro */
+/*! CountrySelect Pro v6.3.0 | MIT | https://github.com/nikmauro/country-select-pro */
 /**
- * CountrySelect Pro v6.2.0
+ * CountrySelect Pro v6.3.0
  * ---------------------------------------------------------------------------
  * Vanilla JS country selector — zero dependencies
  * - Bootstrap 5 ή χωρίς framework: θέμα με CSS μεταβλητές --cs-* (fallback στις --bs-*, άρα και dark mode του Bootstrap)
@@ -8,6 +8,8 @@
  * - Λίστα: ενσωματωμένη (data.json) ή δική σου — array / function, JSON inline, URL (ajax), <option> ενός <select>
  * - Πληκτρολόγιο + ARIA combobox / listbox · αναζήτηση χωρίς τόνους, με κωδικό χώρας ή κλήσης
  * - Ονόματα χωρών σε κάθε γλώσσα (Intl.DisplayNames — data-lang="el")
+ * - Builds: country-select.js (script / CommonJS) · .min.js · .mjs (import) · .css (χωρίς <style> από το JS) · .d.ts
+ * Σημαίες: flag-icons (MIT © Panayiotis Lipiridis) — dist/flags/LICENSE
  * ---------------------------------------------------------------------------
  */
 (function (global) {
@@ -16,7 +18,7 @@
     if (typeof document === 'undefined') return;
     if (global.CountrySelect && global.CountrySelect.version) return; // ήδη φορτωμένο στη σελίδα — ένα αντίγραφο αρκεί
 
-    const VERSION = '6.2.0';
+    const VERSION = '6.3.0';
     const DEFAULT_BASE_URL = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/';
 
     /* ---------------------------------------------------------------- βοηθητικά */
@@ -178,6 +180,8 @@
 
     function injectStyles() {
         if (CountrySelect.defaults.css === false || document.getElementById('cs-styles')) return;
+        // Φορτωμένο το dist/country-select.css (π.χ. για αυστηρό CSP) → όχι <style> από το JS
+        if (getComputedStyle(document.documentElement).getPropertyValue('--cs-css').trim()) return;
         const style = document.createElement('style');
         style.id = 'cs-styles';
         style.textContent = CSS;
@@ -878,7 +882,7 @@
             if (el._countrySelect === this) delete el._countrySelect;
             delete el.dataset.csInitialized;
             if (this._orig) {
-                if (this._orig.style == null) el.removeAttribute('style'); else el.setAttribute('style', this._orig.style);
+                if (this._orig.style == null) el.removeAttribute('style'); else el.style.cssText = this._orig.style; // cssText: επιτρέπεται και με αυστηρό CSP
                 if (this._orig.tabindex == null) el.removeAttribute('tabindex'); else el.setAttribute('tabindex', this._orig.tabindex);
             }
         }

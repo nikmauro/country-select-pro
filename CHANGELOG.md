@@ -2,6 +2,18 @@
 
 All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [6.3.0] – 2026-11-06
+
+### Added
+- **ES module** build `dist/country-select.mjs`: `import CountrySelect from 'country-select-pro'` (default and named export); `package.json` `exports` for `import` / `require` / `types`.
+- **TypeScript types** `dist/country-select.d.ts`: options, custom list items, `getCountry()`, `country-change` event detail, `window.CountrySelectConfig`.
+- **Stylesheet** `dist/country-select.css` / `.min.css` (`import 'country-select-pro/css'`): for a strict Content Security Policy – when it is loaded the script adds no `<style>`.
+- Flag attribution: flag-icons (MIT, © Panayiotis Lipiridis) in `dist/flags/LICENSE` and the README.
+
+### Changed
+- `destroy()` restores the original inline style through `style.cssText` (allowed under a strict CSP).
+- `browser` field removed from `package.json` (bundlers use `exports` / `module`).
+
 ## [6.2.0] – 2026-11-06
 
 ### Fixed
@@ -70,6 +82,7 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 - First releases: search, templates (`data-schema`, `data-schema-return`), phone / code values, dropdown width, row count.
 
+[6.3.0]: https://github.com/nikmauro/country-select-pro/compare/6.2.0...6.3.0
 [6.2.0]: https://github.com/nikmauro/country-select-pro/compare/6.1.4...6.2.0
 [6.1.4]: https://github.com/nikmauro/country-select-pro/compare/6.1.3...6.1.4
 [6.1.3]: https://github.com/nikmauro/country-select-pro/compare/6.1.2...6.1.3

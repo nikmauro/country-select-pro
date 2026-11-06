@@ -36,8 +36,16 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 ### CDN
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.0/dist/country-select.min.js" defer></script>
 ```
+
+The CSS is included in the script. For a strict **Content Security Policy** (no `'unsafe-inline'` styles) load the stylesheet instead – the script detects it and adds no `<style>`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.0/dist/country-select.min.css">
+```
+
+(The arrow is an SVG `data:` image: allow `img-src data:`; flags and the country list come from `cdn.jsdelivr.net` unless you [self-host](#-seo--performance) them.)
 
 ### npm
 
@@ -46,8 +54,21 @@ npm install country-select-pro
 ```
 
 ```javascript
-import 'country-select-pro'; // auto-init + window.CountrySelect
+import CountrySelect from 'country-select-pro';        // ES module (+ auto-init of .country-select)
+import 'country-select-pro/css';                        // optional: CSS file instead of the injected <style>
+
+const cs = new CountrySelect('#country', {preferredCountries: ['GR', 'CY']});
 ```
+
+TypeScript types are included (`CountrySelectOptions`, `CountrySelectCountry`, `CountryItem`, the `country-change` event detail …). `require('country-select-pro')` works too.
+
+| File | |
+| --- | --- |
+| `dist/country-select.js` / `.min.js` | Script (`<script>`, CommonJS) |
+| `dist/country-select.mjs` | ES module |
+| `dist/country-select.css` / `.min.css` | Stylesheet (optional) |
+| `dist/country-select.d.ts` | TypeScript types |
+| `dist/data.json`, `dist/flags/` | Country list, SVG flags |
 
 ---
 
@@ -224,9 +245,14 @@ All modern browsers (Chrome, Edge, Firefox, Safari, iOS, Android). No polyfills 
 ```
 dist/
 ├─ country-select.js        source (also the unminified build)
-├─ country-select.min.js    built by `npm run build` (published to npm, not in git)
+├─ country-select.d.ts      TypeScript types
+├─ country-select.min.js    ┐
+├─ country-select.mjs       │ built by `npm run build`
+├─ country-select.css       │ (published to npm, not in git)
+├─ country-select.min.css   ┘
 ├─ data.json                countries: names, ISO codes, phone codes
-└─ flags/                   SVG flags (4x3, 1x1)
+└─ flags/                   SVG flags (4x3, 1x1) – flag-icons, MIT
+test/                       type check (`npm run check:types`), ESM and CSP test pages
 docs/index.html             live demo, examples, settings playground
 docs/examples/              standalone examples (htmx, plain CSS, <select>, API)
 CHANGELOG.md                release notes
@@ -242,6 +268,12 @@ CHANGELOG.md                release notes
 
 Developed by **Nikolaos Mavroeidis** – https://github.com/nikmauro
 
+## 🙏 Credits
+
+* **Flags:** [flag-icons](https://github.com/lipis/flag-icons) by Panayiotis Lipiridis – MIT ([`dist/flags/LICENSE`](dist/flags/LICENSE)).
+* **Country names in other languages:** the browser's built-in [`Intl.DisplayNames`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames) (Unicode CLDR).
+* **Country list** (`dist/data.json`): country names, ISO 3166-1 alpha-2 codes and international calling codes.
+
 ## 📄 License
 
-MIT – free for personal and commercial projects.
+MIT – free for personal and commercial projects. The flags keep their own MIT license (see Credits).

@@ -107,8 +107,10 @@
             <div class="col-lg-6">
                 <div class="code-wrap"><pre class="code" data-copy>npm install country-select-pro
 
-// auto-init + window.CountrySelect
-import 'country-select-pro';</pre></div>
+import CountrySelect from 'country-select-pro'; // ES module + TypeScript types
+import 'country-select-pro/css';                 // optional: CSS file (strict CSP)
+
+new CountrySelect('#country', { preferredCountries: ['GR', 'CY'] });</pre></div>
             </div>
         </div>
     </section>
