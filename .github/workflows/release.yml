@@ -68,12 +68,13 @@ jobs:
       - name: TypeScript types
         run: npm run check:types
 
-      # Όλοι οι browsers ελέγχονται από το CI σε κάθε push (ίδιος κώδικας). Εδώ: το Google Chrome που έχει ήδη ο runner —
-      # χωρίς κατέβασμα browsers / πακέτων Linux (apt-get), που μπορεί να αργήσει πολύ
-      - name: Tests (Google Chrome, source + minified)
-        env:
-          PW_CHROME_CHANNEL: chrome
-        run: google-chrome --version && npx playwright test --project=chromium --project=chromium-min
+      # Όλοι οι browsers ελέγχονται από το CI σε κάθε push (ίδιος κώδικας). Εδώ μόνο Chromium, ΧΩΡΙΣ πακέτα Linux (--with-deps / apt-get,
+      # που μπορεί να αργήσει πολύ): ο runner έχει ήδη το Google Chrome και τις βιβλιοθήκες του. Δουλεύει και για παλιά tags.
+      - name: Playwright Chromium (no system packages)
+        run: npx playwright install chromium
+
+      - name: Tests (Chromium, source + minified)
+        run: npx playwright test --project=chromium --project=chromium-min
 
       - name: Release notes (CHANGELOG)
         run: node scripts/release-notes.js "$TAG" > "$RUNNER_TEMP/notes.md" && cat "$RUNNER_TEMP/notes.md"
