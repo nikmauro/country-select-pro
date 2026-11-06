@@ -1,0 +1,111 @@
+# Release: tag X.Y.Z → έλεγχος έκδοσης · build · types · tests → npm publish (Trusted Publishing, provenance, χωρίς token / OTP) → GitHub Release
+#
+#   npm version patch          # ή minor / major — ο αριθμός παντού + CHANGELOG, commit + tag
+#   git push --follow-tags
+#
+# Χειροκίνητα (Actions → Release → Run workflow): ένα υπάρχον tag — dry run (χωρίς δημοσίευση),
+# ή GitHub Release για παλιό tag (το npm publish παραλείπεται όταν η έκδοση υπάρχει ήδη στο npm).
+#
+# Μία φορά στο npmjs.com: country-select-pro → Settings → Trusted Publisher → GitHub Actions:
+#   nikmauro / country-select-pro / release.yml
+name: Release
+
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag, e.g. 6.4.0'
+        required: true
+      dry_run:
+        description: 'Dry run: build, test and pack – no npm publish, no GitHub Release'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write   # GitHub Release
+  id-token: write   # npm Trusted Publishing (OIDC) + provenance
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.inputs.tag || github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: npm with Trusted Publishing (>= 11.5.1)
+        run: npm install -g npm@^11.5.1 && npm --version
+
+      - name: Same version in tag, package.json and source
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          SRC=$(node -p "require('fs').readFileSync('dist/country-select.js','utf8').match(/const VERSION = '([^']+)'/)[1]")
+          echo "tag $TAG · package.json $PKG · source $SRC"
+          test "$TAG" = "$PKG" && test "$TAG" = "$SRC"
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: TypeScript types
+        run: npm run check:types
+
+      - name: Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Tests
+        run: npx playwright test
+
+      - name: Release notes (CHANGELOG)
+        run: node scripts/release-notes.js "$TAG" > "$RUNNER_TEMP/notes.md" && cat "$RUNNER_TEMP/notes.md"
+
+      - name: npm publish
+        run: |
+          if npm view "country-select-pro@$TAG" version > /dev/null 2>&1; then
+            echo "country-select-pro@$TAG is already on npm – skip"
+          elif [ "$DRY_RUN" = "true" ]; then
+            npm publish --dry-run
+          else
+            npm publish --provenance --access public
+          fi
+
+      - name: GitHub Release
+        if: env.DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NEWEST=$(git tag --list '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1)
+          LATEST=$([ "$TAG" = "$NEWEST" ] && echo true || echo false)
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag --latest="$LATEST"
+          fi
+
+      - name: Test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

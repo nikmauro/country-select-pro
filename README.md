@@ -275,6 +275,13 @@ npm run check:types             # TypeScript types
 npm run build:data              # regenerate the country list (CLDR + ITU, see dist/data.LICENSE.md)
 ```
 
+**Releasing** – write the changes under `## [Unreleased]` in CHANGELOG.md, then:
+
+```bash
+npm version patch               # or minor / major: package.json, dist/country-select.js, README, CHANGELOG → commit + tag
+git push --follow-tags          # GitHub Actions: tests → npm publish (provenance, no token) → GitHub Release
+```
+
 The tests (Playwright) cover keyboard and screen-reader behaviour (axe-core), search, values and events, custom lists, `<select>`, htmx swap / morph / clone, the CSS file under a strict CSP, the ES module and the built-in country list. They run on every push and pull request ([GitHub Actions](.github/workflows/ci.yml)).
 
 ## 🤝 Contributing

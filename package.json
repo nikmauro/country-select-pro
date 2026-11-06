@@ -45,7 +45,8 @@
     "check:types": "tsc -p test/tsconfig.json",
     "test": "playwright test",
     "test:chromium": "playwright test --project=chromium",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "version": "node scripts/version.js"
   },
   "author": "Nikolaos Mavroidis",
   "license": "MIT",
