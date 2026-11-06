@@ -310,6 +310,8 @@ ZW|Zimbabwe|263
     const yes = (v, def) => (v == null || v === '' ? def : !(v === false || v === 'false' || v === '0' || v === 'no'));
     const phoneOf = (v) => { const d = str(v).replace(/\D/g, '').replace(/^00/, ''); return d ? '+' + d : ''; };
     const isFlagCode = (c) => /^[a-z]{2}(-[a-z]{2,4})?$/i.test(c);
+    // Popover API: η λίστα στο top layer — δεν την κόβει κανένα overflow / z-index / transform (modal, offcanvas, πίνακες)
+    const HAS_POPOVER = typeof HTMLElement !== 'undefined' && Object.prototype.hasOwnProperty.call(HTMLElement.prototype, 'popover');
     const slash = (u) => (u && !/\/$/.test(u) ? u + '/' : u);
 
     /* ---------------------------------------------------------------- δεδομένα */
@@ -409,6 +411,8 @@ ZW|Zimbabwe|263
 }
 .cs-wrapper.drop-up .cs-dropdown { bottom: calc(100% + .25rem); top: auto; box-shadow: var(--cs-shadow-up, 0 -.5rem 1rem rgba(0, 0, 0, .175)); }
 .cs-wrapper.open .cs-dropdown { display: block; }
+/* Popover (top layer): θέση από το JS — χωρίς τα προεπιλεγμένα του browser (inset / margin / padding / overflow) */
+.cs-dropdown[popover] { position: fixed; inset: auto; margin: 0; padding: 0; height: auto; overflow: hidden; }
 
 .cs-search-box { padding: 8px; background: var(--cs-search-bg, var(--bs-tertiary-bg, #f8f9fa)); border-bottom: 1px solid var(--cs-divider-color, var(--bs-border-color, #dee2e6)); }
 .cs-search-input { font-size: .875rem; }
@@ -514,6 +518,7 @@ ZW|Zimbabwe|263
             this.rowLimit = parseInt(pick('rows', 'countryRowValues'), 10) || 5;
             this.hasSearch = yes(pick('search', 'countrySearch'), true);
             this.dropdownWidth = pick('dropdownWidth') || 'auto';
+            this.usePopover = HAS_POPOVER && yes(pick('popover'), true); // false = μέσα στη ροή της σελίδας (όπως ≤ 6.4)
             this.preferredCodes = codeList(pick('preferredCountries', 'preferred'));
             this.onlyCodes = codeList(pick('onlyCountries'));
             this.excludeCodes = codeList(pick('excludeCountries'));
@@ -609,6 +614,7 @@ ZW|Zimbabwe|263
             this.searchEl.setAttribute('aria-controls', id + '-list');
             this.listEl.setAttribute('aria-label', label || c.listLabel);
             this.dropdownEl.style.width = this.dropdownWidth === 'auto' ? '100%' : this.dropdownWidth;
+            if (this.usePopover) this.dropdownEl.setAttribute('popover', 'manual'); // κλείσιμο από εμάς (κλικ έξω, Esc, Tab)
             if (!el.value) this._showPlaceholder();
 
             el.parentNode.insertBefore(w, el.nextSibling);
@@ -643,6 +649,13 @@ ZW|Zimbabwe|263
             };
             on(el, 'change', external);
             on(el, 'input', external);
+            // Μέσα σε <dialog>: το Esc κλείνει μόνο τη λίστα, όχι το dialog
+            const dialog = el.closest('dialog');
+            if (dialog) on(dialog, 'cancel', (e) => {
+                if (!this.isOpen) return;
+                e.preventDefault();
+                this.close(true);
+            });
             on(el, 'invalid', () => {
                 w.classList.add('is-invalid');
                 w.setAttribute('aria-invalid', 'true');
@@ -886,6 +899,50 @@ ZW|Zimbabwe|263
             this.wrapper.classList.toggle('drop-up', spaceBelow < dropdownHeight && rect.top > dropdownHeight);
         }
 
+        /** Popover: θέση στο viewport κάτω / πάνω από το control (fixed — ακολουθεί scroll και resize) */
+        _place(moved) {
+            if (!this.usePopover || !this.isOpen) return;
+            const r = this.wrapper.getBoundingClientRect(), d = this.dropdownEl;
+            const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+            if (moved && (r.bottom < 0 || r.top > vh)) return this.close(); // το control βγήκε από την οθόνη (scroll κ.λπ.)
+            if (this.dropdownWidth === 'auto') d.style.width = r.width + 'px';
+            const w = d.offsetWidth;
+            const rtl = getComputedStyle(this.wrapper).direction === 'rtl';
+            let left = rtl ? r.right - w : r.left;
+            left = Math.max(8, Math.min(left, vw - 8 - w));
+            d.style.left = left + 'px';
+            if (this.wrapper.classList.contains('drop-up')) {
+                d.style.top = 'auto';
+                d.style.bottom = (vh - r.top + 4) + 'px';
+            } else {
+                d.style.bottom = 'auto';
+                d.style.top = (r.bottom + 2) + 'px';
+            }
+        }
+
+        /**
+         * Όσο είναι ανοιχτή: σε κάθε frame, αν μετακινήθηκε το control (scroll, resize, animation του modal,
+         * αλλαγή της σελίδας από πάνω) → νέα θέση. Μία μέτρηση ανά frame, μόνο όσο είναι ανοιχτή.
+         */
+        _watchPosition(on) {
+            if (this._raf) cancelAnimationFrame(this._raf);
+            this._raf = 0;
+            if (!on) return;
+            let last = '';
+            const tick = () => {
+                if (!this.isOpen) return;
+                const r = this.wrapper.getBoundingClientRect();
+                const key = [r.left, r.top, r.width, r.height, window.innerWidth, window.innerHeight].join(',');
+                if (key !== last) {
+                    const moved = last !== '';
+                    last = key;
+                    this._place(moved);
+                }
+                if (this.isOpen) this._raf = requestAnimationFrame(tick);
+            };
+            this._raf = requestAnimationFrame(tick);
+        }
+
         _itemTop(item) {
             return item.getBoundingClientRect().top - this.listEl.getBoundingClientRect().top + this.listEl.scrollTop;
         }
@@ -1081,6 +1138,13 @@ ZW|Zimbabwe|263
             this.isOpen = true;
             this.wrapper.classList.add('open');
             this.wrapper.setAttribute('aria-expanded', 'true');
+            if (this.usePopover) {
+                try {
+                    if (!this.dropdownEl.matches(':popover-open')) this.dropdownEl.showPopover();
+                } catch (e) { /* εκτός σελίδας κ.λπ. — μένει μέσα στη ροή */ }
+                this._place();
+                this._watchPosition(true);
+            }
             this.activeIndex = this.selected ? this.ordered.indexOf(this.selected) : -1;
             this._updateActive();
             this._scrollToActive();
@@ -1092,6 +1156,12 @@ ZW|Zimbabwe|263
             this.isOpen = false;
             this.wrapper.classList.remove('open');
             this.wrapper.setAttribute('aria-expanded', 'false');
+            if (this.usePopover) {
+                this._watchPosition(false);
+                try {
+                    if (this.dropdownEl.matches(':popover-open')) this.dropdownEl.hidePopover();
+                } catch (e) { /* ήδη κλειστό */ }
+            }
             this._updateActive();
             if (refocus) this.wrapper.focus({preventScroll: true});
         }

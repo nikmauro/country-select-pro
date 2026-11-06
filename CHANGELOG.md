@@ -4,6 +4,12 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 ## [Unreleased]
 
+### Added
+- **The list is no longer clipped inside modals, offcanvas, `<dialog>` or `overflow: hidden` containers**: it opens in the browser's top layer (Popover API) while staying in the same place in the DOM – so Bootstrap's focus trap, clicks and <kbd>Esc</kbd> (closes only the list, not the modal / dialog) keep working. It is positioned under / above the control and follows it on scroll, resize, modal animations and page changes; it closes when the control scrolls off screen. `data-popover="false"` keeps the previous in-page list; browsers without the Popover API use it automatically.
+
+### Development
+- Tests: overflow / transformed modal / `<dialog>` / scroll, real Bootstrap 5.3 modal and offcanvas.
+
 ## [6.4.1] – 2026-11-06
 
 ### Fixed

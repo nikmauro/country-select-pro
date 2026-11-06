@@ -20,6 +20,7 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 * 🌐 **Localized names** – country names in any language via `Intl.DisplayNames` (`data-lang="el"`).
 * ♿ **Accessible** – ARIA combobox / listbox, full keyboard support, live result count, forced-colors and reduced-motion support.
 * ⚡ **SEO & performance friendly** – progressive enhancement with `<select>`, the country list inside the script (no data request), lazy flags with fixed size (no layout shift), self-hosting option.
+* 🪟 **Works in modals** – the list opens in the top layer (Popover API): not clipped by Bootstrap modals / offcanvas, `<dialog>` or `overflow: hidden`, and the modal's focus trap and <kbd>Esc</kbd> keep working.
 * 🔁 **htmx ready** – auto-init on swapped / morphed / cloned content.
 
 ---
@@ -135,6 +136,7 @@ Every option can be set as a `data-*` attribute or as a JavaScript option (JS wi
 | `data-no-results` | `noResults` | `Not found` | |
 | `data-country-row-values` | `rows` | `5` | Visible rows |
 | `data-dropdown-width` | `dropdownWidth` | `auto` | e.g. `300px` |
+| `data-popover` | `popover` | `true` | The list opens in the browser's top layer (Popover API): never clipped by modals, offcanvas or `overflow: hidden`, follows the control. `false` = inside the page (as ≤ 6.4) |
 | `data-lang` | `lang` | – | Country names & texts language (`el`, `de`, … or `auto` = `<html lang>`) |
 | `data-flags` | `flags` | `true` | `false` = no flags |
 | `data-sort` | `sort` | `true` | `false` = keep the order of your list |

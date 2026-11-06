@@ -335,6 +335,20 @@ new CountrySelect('#country', { preferredCountries: ['GR', 'CY'] });</pre></div>
                 </div></article>
             </div>
 
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-popover"><div class="card-body">
+                    <h3 class="card-title">Not clipped – modals, offcanvas, overflow</h3>
+                    <p class="card-text">The list opens in the browser's top layer (Popover API): this box has <code>overflow: hidden</code>, yet the list is fully visible. The same in Bootstrap modals / offcanvas and <code>&lt;dialog&gt;</code>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div style="height: 64px; overflow: hidden; border: 1px dashed var(--bs-border-color); border-radius: 8px; padding: 10px">
+                            <input type="text" class="country-select" name="country" value="GR" data-preferred="GR,CY" aria-label="Country">
+                        </div>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
         </div>
 
         <p class="mt-4 mb-0">More: <a href="examples/htmx.html">htmx (swap, morph, history)</a> · <a href="examples/plain.html">without any framework</a> · <a href="examples/api.html">JavaScript API</a> · <a href="examples/">all examples</a></p>
@@ -464,6 +478,7 @@ new CountrySelect('#country', { preferredCountries: ['GR', 'CY'] });</pre></div>
                 <tr><td><code>data-no-results</code></td><td><code>noResults</code></td><td><code>Not found</code></td><td>Empty search text</td></tr>
                 <tr><td><code>data-country-row-values</code></td><td><code>rows</code></td><td><code>5</code></td><td>Visible rows</td></tr>
                 <tr><td><code>data-dropdown-width</code></td><td><code>dropdownWidth</code></td><td><code>auto</code></td><td>e.g. <code>300px</code></td></tr>
+                <tr><td><code>data-popover</code></td><td><code>popover</code></td><td><code>true</code></td><td>List in the top layer (Popover API): not clipped by modals / offcanvas / <code>overflow: hidden</code>. <code>false</code> = inside the page</td></tr>
                 <tr><td><code>data-lang</code></td><td><code>lang</code></td><td>–</td><td>Language of names and texts: <code>el</code>, <code>de</code> … or <code>auto</code> (<code>&lt;html lang&gt;</code>)</td></tr>
                 <tr><td><code>data-flags</code></td><td><code>flags</code></td><td><code>true</code></td><td><code>false</code> = no flags</td></tr>
                 <tr><td><code>data-sort</code></td><td><code>sort</code></td><td><code>true</code></td><td><code>false</code> = keep the order of your list</td></tr>

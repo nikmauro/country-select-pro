@@ -80,6 +80,8 @@ export interface CountrySelectOptions {
     rows?: number;
     /** e.g. "300px". Default "auto". `data-dropdown-width` */
     dropdownWidth?: string;
+    /** List in the top layer (Popover API) — not clipped by modals / overflow. Default true. `data-popover` */
+    popover?: boolean;
     /** Language of country names and texts ("el", "de" …) or "auto" (= `<html lang>`). `data-lang` */
     lang?: string;
     /** Show flags. Default true. `data-flags` */

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: Bootstrap modal / offcanvas</title>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body class="p-4">
+<main>
+    <h1 class="h4">Bootstrap</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#m">Modal</button>
+    <button type="button" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#oc">Offcanvas</button>
+</main>
+
+<div class="modal fade" id="m" tabindex="-1" aria-labelledby="m-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title h5" id="m-title">Modal</h2></div>
+            <div class="modal-body" style="max-height: 160px">
+                <label class="form-label" for="in-m">Country</label>
+                <input type="text" class="country-select" id="in-m" value="GR" data-preferred="GR,CY">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="oc" tabindex="-1" aria-labelledby="oc-title">
+    <div class="offcanvas-header"><h2 class="offcanvas-title h5" id="oc-title">Offcanvas</h2></div>
+    <div class="offcanvas-body">
+        <label class="form-label" for="in-oc">Country</label>
+        <input type="text" class="country-select" id="in-oc" value="GR" data-preferred="GR,CY">
+    </div>
+</div>
+
+<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="load.js"></script>
+</body>
+</html>

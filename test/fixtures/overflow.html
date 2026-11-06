@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: overflow / modal / dialog</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto; }
+        .clip { position: relative; overflow: hidden; height: 90px; border: 2px solid #999; padding: 8px; margin-bottom: 16px; }
+        .spacer { height: 1600px; }
+        /* σαν Bootstrap modal / offcanvas: fixed, transform, σώμα με scroll */
+        .fake-modal { position: fixed; top: 40px; left: 50%; width: 360px; transform: translateX(-50%); z-index: 1055; background: #fff; border: 2px solid #333; }
+        .fake-modal-body { max-height: 120px; overflow-y: auto; padding: 10px; }
+        dialog { width: 360px; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>overflow</h1>
+
+    <div class="clip" id="clip-box"><input type="text" class="country-select" id="in-clip" value="GR" data-preferred="GR,CY" aria-label="In clip"></div>
+
+    <div class="clip" id="inline-box"><input type="text" class="country-select" id="inline" value="GR" data-preferred="GR,CY" data-popover="false" aria-label="Inline"></div>
+
+    <div class="fake-modal" id="modal" hidden>
+        <div class="fake-modal-body"><p>Modal</p><input type="text" class="country-select" id="in-modal" value="GR" data-preferred="GR,CY" aria-label="In modal"></div>
+    </div>
+
+    <dialog id="dlg"><p>Dialog</p><input type="text" class="country-select" id="in-dialog" value="GR" data-preferred="GR,CY" aria-label="In dialog"></dialog>
+
+    <div style="margin-top: 200px"><input type="text" class="country-select" id="scroll-me" value="GR" aria-label="Scroll"></div>
+    <div class="spacer"></div>
+</main>
+<script src="load.js"></script>
+</body>
+</html>
