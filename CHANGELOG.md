@@ -4,6 +4,8 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 ## [Unreleased]
 
+## [6.4.1] – 2026-11-06
+
 ### Fixed
 - Screen-reader result count in the singular: "1 result" / "1 αποτέλεσμα" (was "1 results"); new text option `result`.
 
@@ -120,6 +122,7 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 - First releases: search, templates (`data-schema`, `data-schema-return`), phone / code values, dropdown width, row count.
 
+[6.4.1]: https://github.com/nikmauro/country-select-pro/compare/6.4.0...6.4.1
 [6.4.0]: https://github.com/nikmauro/country-select-pro/compare/6.3.1...6.4.0
 [6.3.1]: https://github.com/nikmauro/country-select-pro/compare/6.3.0...6.3.1
 [6.3.0]: https://github.com/nikmauro/country-select-pro/compare/6.2.0...6.3.0
