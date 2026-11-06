@@ -1,0 +1,51 @@
+# Σε κάθε push στο main και σε κάθε pull request: build · έλεγχος TypeScript types · tests (Chromium, Firefox, WebKit, minified)
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build (min.js, mjs, css)
+        run: npm run build
+
+      - name: TypeScript types
+        run: npm run check:types
+
+      - name: Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Tests
+        run: npx playwright test
+
+      - name: Test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

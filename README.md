@@ -1,5 +1,6 @@
 # CountrySelect Pro 🌍
 
+[![CI](https://github.com/nikmauro/country-select-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/nikmauro/country-select-pro/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/country-select-pro)](https://www.npmjs.com/package/country-select-pro)
 [![jsDelivr](https://data.jsdelivr.com/v1/package/npm/country-select-pro/badge)](https://www.jsdelivr.com/package/npm/country-select-pro)
@@ -253,16 +254,33 @@ dist/
 ├─ data.json                the built-in country list as JSON (generated)
 ├─ data.LICENSE.md          sources and licenses of the country list
 └─ flags/                   SVG flags (4x3, 1x1) – flag-icons, MIT
-test/                       type check (`npm run check:types`), ESM and CSP test pages
+scripts/build-data.js       generates the country list (`npm run build:data`)
+test/e2e/                   Playwright tests (`npm test`)
+test/fixtures/              test pages
+test/types-check.ts         TypeScript check (`npm run check:types`)
 docs/index.html             live demo, examples, settings playground
 docs/examples/              standalone examples (htmx, plain CSS, <select>, API)
 CHANGELOG.md                release notes
 ```
 
+## 🛠️ Development
+
+```bash
+npm install
+npx playwright install          # once: Chromium, Firefox, WebKit
+npm run build                   # min.js, .mjs, .css
+npm test                        # all browsers + the minified build
+npm run test:chromium           # quick
+npm run check:types             # TypeScript types
+npm run build:data              # regenerate the country list (CLDR + ITU, see dist/data.LICENSE.md)
+```
+
+The tests (Playwright) cover keyboard and screen-reader behaviour (axe-core), search, values and events, custom lists, `<select>`, htmx swap / morph / clone, the CSS file under a strict CSP, the ES module and the built-in country list. They run on every push and pull request ([GitHub Actions](.github/workflows/ci.yml)).
+
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch – `npm test` must pass
 3. Submit a Pull Request
 
 ## 👨‍💻 Author

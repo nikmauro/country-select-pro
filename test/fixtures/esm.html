@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture: ES module</title></head>
+<body>
+<main>
+    <h1>ESM</h1>
+    <input type="text" id="manual" aria-label="Manual">
+    <input type="text" class="country-select" id="auto" value="CY" aria-label="Auto">
+</main>
+<script type="module">
+    import CountrySelect, {CountrySelect as Named} from '/dist/country-select.mjs';
+    const cs = new CountrySelect('#manual', {defaultCountry: 'GR', preferredCountries: ['GR', 'CY'], baseUrl: '/'});
+    await cs.ready;
+    window.__esm = {
+        same: CountrySelect === Named && CountrySelect === window.CountrySelect,
+        version: CountrySelect.version,
+        manual: cs.getCountry()
+    };
+</script>
+</body>
+</html>

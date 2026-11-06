@@ -2,6 +2,12 @@
 
 All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Development
+- **Automated tests** with Playwright on Chromium, Firefox and WebKit plus the minified build: keyboard (Enter with preferred countries, Escape, typing), ARIA and axe-core accessibility scan, search (accents, former names, calling codes), values and events, custom lists, `<select>`, htmx swap / morph (no flash, server error message kept) / clone / history copy, CSS file under a strict CSP, ES module, built-in country list.
+- **GitHub Actions CI**: build, TypeScript check and all tests on every push and pull request.
+
 ## [6.4.0] – 2026-11-06
 
 ### Changed

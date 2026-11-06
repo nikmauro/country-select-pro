@@ -66,10 +66,11 @@ const rows = CODES.map((code) => {
 });
 
 // ---- μέσα στο JS: μία γραμμή ανά χώρα «CODE|Name|phone|άλλα ονόματα»
-const block = rows.map((r) => [r.code, r.name, r.phone].concat(r.also ? [r.also] : []).join('|')).join('\n');
 const jsFile = path.join(ROOT, 'dist/country-select.js');
 const js = fs.readFileSync(jsFile, 'utf8');
-const re = /(\/\* DATA:START \*\/ `\n)[\s\S]*?(\n` \/\* DATA:END \*\/)/;
+const eol = js.includes('\r\n') ? '\r\n' : '\n'; // ίδιες αλλαγές γραμμής με το αρχείο (git autocrlf στα Windows)
+const block = rows.map((r) => [r.code, r.name, r.phone].concat(r.also ? [r.also] : []).join('|')).join(eol);
+const re = /(\/\* DATA:START \*\/ `\r?\n)[\s\S]*?(\r?\n` \/\* DATA:END \*\/)/;
 if (!re.test(js)) throw new Error('DATA markers not found in dist/country-select.js');
 fs.writeFileSync(jsFile, js.replace(re, (m, a, b) => a + block + b));
 

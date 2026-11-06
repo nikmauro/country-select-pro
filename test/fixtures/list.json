@@ -1,0 +1,5 @@
+{"countries": [
+  {"value": "X1", "code": "GR", "name": "Athens warehouse"},
+  {"value": "X2", "code": "CY", "name": "Nicosia hub"},
+  {"value": "X3", "name": "Pickup point", "flag": false}
+]}

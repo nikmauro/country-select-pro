@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: basic</title>
+    <style>body { font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto; } .row { margin: 0 0 14px; }</style>
+</head>
+<body>
+<main>
+    <h1>basic</h1>
+
+    <div class="row"><label for="pref">Preferred</label>
+        <input type="text" class="country-select" id="pref" name="pref" value="GR" data-preferred="bg, cy, gr"></div>
+
+    <div class="row"><input type="text" class="country-select" id="us" value="+1" data-value-type="phone" data-schema-return="{img} {name} {phone}" aria-label="US"></div>
+    <div class="row"><input type="text" class="country-select" id="gb" value="+44" data-value-type="phone" data-schema-return="{img} {name} {phone}" aria-label="GB"></div>
+    <div class="row"><input type="text" class="country-select" id="ca" value="+1" data-value-type="phone" data-preferred="CA" data-schema-return="{name}" aria-label="CA"></div>
+    <div class="row"><input type="text" class="country-select" id="lower" value="gr" aria-label="Lower"></div>
+    <div class="row"><input type="text" class="country-select" id="name" value="Turkey" data-value-type="name" aria-label="Name"></div>
+    <div class="row"><input type="text" class="country-select" id="el" value="CY" data-lang="el" aria-label="Greek"></div>
+    <div class="row"><input type="text" class="country-select" id="def" data-default-country="CY" aria-label="Default"></div>
+    <div class="row"><input type="text" class="country-select" id="plain" aria-label="Plain" data-placeholder="Pick one"></div>
+    <div class="row"><input type="text" class="country-select" id="dis" value="FR" disabled aria-label="Disabled"></div>
+    <div class="row"><input type="text" class="country-select" id="ro" value="IT" readonly aria-label="Readonly"></div>
+
+    <div class="row" id="esc-wrap"><input type="text" class="country-select" id="esc" value="DE" aria-label="Escape"></div>
+
+    <form id="form" novalidate>
+        <div class="row"><input type="text" class="country-select" id="req" name="req" required aria-label="Required"></div>
+        <div class="row"><input type="text" class="country-select" id="ev" name="ev" value="GR" aria-label="Events"></div>
+        <button type="reset" id="reset">Reset</button>
+    </form>
+
+    <div class="row"><input type="text" id="manual" aria-label="Manual"></div>
+</main>
+<script>
+    window.__escSeen = 0;
+    document.getElementById('esc-wrap').addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') window.__escSeen++;
+    });
+</script>
+<script src="load.js"></script>
+</body>
+</html>

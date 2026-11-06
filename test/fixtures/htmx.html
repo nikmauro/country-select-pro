@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: htmx</title>
+    <!-- ίδιες εκδόσεις με το cms39 (devDependencies, χωρίς CDN) -->
+    <script src="/node_modules/htmx.org/dist/htmx.min.js"></script>
+    <script src="/node_modules/idiomorph/dist/idiomorph-ext.min.js"></script>
+</head>
+<body hx-ext="morph" style="font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto">
+<main>
+    <h1>htmx</h1>
+    <form id="f" hx-get="/test/fixtures/htmx-partial.html" hx-trigger="go" hx-target="#zone" hx-swap="morph:innerHTML">
+        <div id="zone">
+            <div class="field"><input type="text" class="country-select" name="country" value="GR" aria-label="Country"><div class="err">Error A</div></div>
+        </div>
+    </form>
+
+    <div id="swap-zone"><input type="text" class="country-select" id="sw" name="sw" value="IT" aria-label="Swap"></div>
+
+    <div id="rows"><div class="row-item"><input type="text" class="country-select" name="c[]" value="ES" aria-label="Row"></div></div>
+
+    <div id="hist"><input type="text" class="country-select" id="hi" value="PT" aria-label="History"></div>
+</main>
+<script>
+    // Τι ζωγραφίζει ο browser στο πρώτο frame μετά από κάθε swap
+    window.__frames = [];
+    document.body.addEventListener('htmx:afterSwap', function () {
+        requestAnimationFrame(function () {
+            var el = document.querySelector('#zone .country-select');
+            window.__frames.push({
+                live: !!(window.CountrySelect && CountrySelect.getInstance(el)),
+                inputHidden: getComputedStyle(el).opacity === '0',
+                wrappers: document.querySelectorAll('#zone .cs-wrapper').length,
+                err: (document.querySelector('#zone .err') || {}).textContent || null
+            });
+        });
+    });
+</script>
+<script src="load.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!-- Αυστηρό CSP: χωρίς 'unsafe-inline' για styles και scripts → μόνο το dist/country-select.css -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:; script-src 'self'; connect-src 'self'">
+    <title>Fixture: CSS file + strict CSP</title>
+    <link rel="stylesheet" href="/dist/country-select.css">
+</head>
+<body>
+<main>
+    <h1>CSP</h1>
+    <input type="text" class="country-select" id="c" value="GR" aria-label="Country" data-preferred="GR,CY" data-base-url="/">
+</main>
+<script src="/dist/country-select.js"></script>
+</body>
+</html>

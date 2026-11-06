@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: lists</title>
+    <style>body { font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto; } .row { margin: 0 0 14px; }</style>
+</head>
+<body>
+<main>
+    <h1>lists</h1>
+    <form id="form">
+        <div class="row">
+            <select class="country-select" id="sel" name="ship" aria-label="Shipping">
+                <option value="">Choose shipping country</option>
+                <option value="GR">Greece · 1–2 days</option>
+                <option value="CY" selected>Cyprus · 3–4 days</option>
+                <option value="DE">Germany</option>
+                <option value="BG"></option>
+            </select>
+        </div>
+    </form>
+
+    <div class="row"><input type="text" class="country-select" id="json" aria-label="JSON" data-sort="false"
+        data-countries='[{"code":"GR","name":"Greece – mainland"},"CY",{"value":"PICKUP","name":"Store pickup","flag":false}]'></div>
+    <div class="row"><input type="text" class="country-select" id="merge" aria-label="Merge" data-value-type="phone"
+        data-countries='["GR","CY","IT"]' data-schema="{name} {phone}"></div>
+    <div class="row"><input type="text" class="country-select" id="ajax" aria-label="Ajax" data-src="/test/fixtures/list.json" value="X2"></div>
+    <div class="row"><input type="text" class="country-select" id="only" aria-label="Only" data-only-countries="GR,CY,DE"></div>
+    <div class="row"><input type="text" class="country-select" id="excl" aria-label="Exclude" data-exclude-countries="AQ,BV"></div>
+    <div class="row"><input type="text" class="country-select" id="noflags" value="PT" aria-label="No flags" data-flags="false"></div>
+    <div class="row"><input type="text" class="country-select" id="phone" value="+30" aria-label="Phone" data-value-type="phone"></div>
+    <div class="row"><input type="text" class="country-select" id="code" value="GR" aria-label="Code"></div>
+</main>
+<script src="load.js"></script>
+</body>
+</html>
