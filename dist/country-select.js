@@ -1,5 +1,5 @@
 /**
- * CountrySelect Pro v6.1.3
+ * CountrySelect Pro v6.1.4
  * ---------------------------------------------------------------------------
  * Features:
  * - SVG Arrow Down icon
@@ -13,7 +13,7 @@
 
 class CountrySelect {
 
-    
+
     constructor(element, options = {}) {
         this.input = element;
         if (!this.input) return;
@@ -46,10 +46,10 @@ class CountrySelect {
         this.isOpen = false;
         this.activeIndex = -1;
         this.rowHeight = 44;
-        
+
         // Base URL για το JSON και τα SVG flags
         this.baseUrl = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/';
-        
+
         this._init();
     }
 
@@ -186,17 +186,17 @@ class CountrySelect {
     }
 
     _updateActiveElement() {
-    const options = this.wrapper.querySelectorAll('.cs-option');
-    options.forEach((el, index) => {
-        if (index === this.activeIndex) {
-            el.classList.add('active');
-            // Bonus UX: Κάνει scroll αν το element είναι εκτός οθόνης
-            el.scrollIntoView({ block: 'nearest' });
-        } else {
-            el.classList.remove('active');
-        }
-    });
-}
+        const options = this.wrapper.querySelectorAll('.cs-option');
+        options.forEach((el, index) => {
+            if (index === this.activeIndex) {
+                el.classList.add('active');
+                // Bonus UX: Κάνει scroll αν το element είναι εκτός οθόνης
+                el.scrollIntoView({block: 'nearest'});
+            } else {
+                el.classList.remove('active');
+            }
+        });
+    }
 
     _updatePosition() {
         const rect = this.wrapper.getBoundingClientRect();
@@ -212,35 +212,35 @@ class CountrySelect {
     }
 
     async _loadData() {
-    try {
-        const jsonUrl = `${this.baseUrl}dist/data.json`; // Χρήση του baseUrl
-        
-        const res = await fetch(jsonUrl);
-        const json = await res.json();
-        const data = json?.data?.objects || [];
+        try {
+            const jsonUrl = `${this.baseUrl}dist/data.json`; // Χρήση του baseUrl
 
-        this.countries = data.map(c => {
-            const code = c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "";
-            return {
-                name: c.names?.common || "",
-                code: code,
-                // Δημιουργία path για το SVG με βάση το code
-                flag: code ? `${this.baseUrl}dist/flags/4x3/${code.toLowerCase()}.svg` : "",
-                phone: (c.calling_codes && c.calling_codes.length > 0) ? `+${c.calling_codes[0]}` : "",
-                isPreferred: code ? this.preferredCodes.includes(code) : false
-            };
-        }).filter(c => c.code !== "")
-          .sort((a, b) => a.name.localeCompare(b.name));
+            const res = await fetch(jsonUrl);
+            const json = await res.json();
+            const data = json?.data?.objects || [];
 
-        this.filteredCountries = [...this.countries];
-        this._renderOptions();
-        this._syncInitialValue();
-    } catch (e) {
-        console.error("CountrySelect Load Fail:", e);
+            this.countries = data.map(c => {
+                const code = c.codes?.alpha_2 ? c.codes.alpha_2.toUpperCase() : "";
+                return {
+                    name: c.names?.common || "",
+                    code: code,
+                    // Δημιουργία path για το SVG με βάση το code
+                    flag: code ? `${this.baseUrl}dist/flags/4x3/${code.toLowerCase()}.svg` : "",
+                    phone: (c.calling_codes && c.calling_codes.length > 0) ? `+${c.calling_codes[0]}` : "",
+                    isPreferred: code ? this.preferredCodes.includes(code) : false
+                };
+            }).filter(c => c.code !== "")
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            this.filteredCountries = [...this.countries];
+            this._renderOptions();
+            this._syncInitialValue();
+        } catch (e) {
+            console.error("CountrySelect Load Fail:", e);
+        }
     }
-}
 
-    
+
     _syncInitialValue() {
         const val = this.input.value;
         if (!val) {
@@ -253,52 +253,52 @@ class CountrySelect {
 
 
     _parseTemplate(template, country) {
-    return template
-        .replace('{img}', `<img src="${country.flag}" class="cs-flag-img" loading="lazy" alt="${country.name}">`)
-        .replace('{name}', `<span>${country.name}</span>`)
-        .replace('{code}', `<span>${country.code}</span>`)
-        .replace('{phone}', `<span>${country.phone}</span>`);
-}
-
-   _renderOptions() {
-    const listContainer = this.wrapper.querySelector('.cs-list');
-    if (!listContainer) return;
-    listContainer.innerHTML = '';
-    
-    // Έλεγχος αν η λίστα είναι άδεια
-    if (this.filteredCountries.length === 0) {
-        const noResults = document.createElement('div');
-        noResults.className = 'cs-no-results';
-        noResults.innerHTML = '<span class="cs-no-results-text">Not found</span>';
-        listContainer.appendChild(noResults);
-        return; // Σταματάμε εδώ
+        return template
+            .replace('{img}', `<img src="${country.flag}" class="cs-flag-img" loading="lazy" alt="${country.name}">`)
+            .replace('{name}', `<span>${country.name}</span>`)
+            .replace('{code}', `<span>${country.code}</span>`)
+            .replace('{phone}', `<span>${country.phone}</span>`);
     }
 
-    const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
-    const preferred = this.filteredCountries.filter(c => c.isPreferred);
-    const others = this.filteredCountries.filter(c => !c.isPreferred);
+    _renderOptions() {
+        const listContainer = this.wrapper.querySelector('.cs-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
 
-    const createOption = (country, index) => {
-        const div = document.createElement('div');
-        div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
-        div.innerHTML = this._parseTemplate(this.schema, country);
-        div.onclick = (e) => {
-            e.stopPropagation();
-            this._select(country);
+        // Έλεγχος αν η λίστα είναι άδεια
+        if (this.filteredCountries.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'cs-no-results';
+            noResults.innerHTML = '<span class="cs-no-results-text">Not found</span>';
+            listContainer.appendChild(noResults);
+            return; // Σταματάμε εδώ
+        }
+
+        const searchVal = this.wrapper.querySelector('.cs-search-input')?.value || "";
+        const preferred = this.filteredCountries.filter(c => c.isPreferred);
+        const others = this.filteredCountries.filter(c => !c.isPreferred);
+
+        const createOption = (country, index) => {
+            const div = document.createElement('div');
+            div.className = `cs-option ${index === this.activeIndex ? 'active' : ''}`;
+            div.innerHTML = this._parseTemplate(this.schema, country);
+            div.onclick = (e) => {
+                e.stopPropagation();
+                this._select(country);
+            };
+            return div;
         };
-        return div;
-    };
 
-    preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
+        preferred.forEach((c, i) => listContainer.appendChild(createOption(c, i)));
 
-    if (preferred.length > 0 && others.length > 0 && !searchVal) {
-        const hr = document.createElement('div');
-        hr.className = 'cs-divider';
-        listContainer.appendChild(hr);
+        if (preferred.length > 0 && others.length > 0 && !searchVal) {
+            const hr = document.createElement('div');
+            hr.className = 'cs-divider';
+            listContainer.appendChild(hr);
+        }
+
+        others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
     }
-
-    others.forEach((c, i) => listContainer.appendChild(createOption(c, preferred.length + i)));
-}
 
     _select(country) {
         this._updateUI(country);
@@ -326,35 +326,35 @@ class CountrySelect {
         if (content) content.innerHTML = this._parseTemplate(this.schemaReturn, country);
     }
 
-   _toggle(force) {
-    if (this.countries.length === 0) return;
-    this.isOpen = force !== undefined ? force : !this.isOpen;
-    
-    if (this.isOpen) {
-        this._updatePosition();
-        document.dispatchEvent(new CustomEvent('cs-close-others', {detail: {opener: this.wrapper}}));
+    _toggle(force) {
+        if (this.countries.length === 0) return;
+        this.isOpen = force !== undefined ? force : !this.isOpen;
 
-        // ΑΛΛΑΓΗ: Έλεγχος αν η λίστα έχει ήδη στοιχεία
-        const list = this.wrapper.querySelector('.cs-list');
-        if (list.children.length === 0) {
-            this._renderOptions();
+        if (this.isOpen) {
+            this._updatePosition();
+            document.dispatchEvent(new CustomEvent('cs-close-others', {detail: {opener: this.wrapper}}));
+
+            // ΑΛΛΑΓΗ: Έλεγχος αν η λίστα έχει ήδη στοιχεία
+            const list = this.wrapper.querySelector('.cs-list');
+            if (list.children.length === 0) {
+                this._renderOptions();
+            }
+
+            list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
+
+            const pref = this.filteredCountries.filter(c => c.isPreferred);
+            const oth = this.filteredCountries.filter(c => !c.isPreferred);
+            const fullList = [...pref, ...oth];
+            this.activeIndex = fullList.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
+
+            // ΑΛΛΑΓΗ: Ενημέρωσε το active element αντί να κάνεις re-render όλη τη λίστα
+            this._updateActiveElement();
+
+            if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(true), 0); // 6.1.4: από την αρχή, αν η επιλεγμένη φαίνεται εκεί
+            if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
         }
-
-        list.style.maxHeight = `${this.rowLimit * this.rowHeight}px`;
-
-        const pref = this.filteredCountries.filter(c => c.isPreferred);
-        const oth = this.filteredCountries.filter(c => !c.isPreferred);
-        const fullList = [...pref, ...oth];
-        this.activeIndex = fullList.findIndex(c => this.input.value.includes(c.code) || this.input.value.includes(c.phone));
-
-        // ΑΛΛΑΓΗ: Ενημέρωσε το active element αντί να κάνεις re-render όλη τη λίστα
-        this._updateActiveElement();
-
-        if (this.activeIndex > -1) setTimeout(() => this._scrollToActive(), 0);
-        if (this.hasSearch) setTimeout(() => this.wrapper.querySelector('.cs-search-input').focus(), 50);
+        this.wrapper.classList.toggle('open', this.isOpen);
     }
-    this.wrapper.classList.toggle('open', this.isOpen);
-}
 
     _bindEvents() {
         this.wrapper.querySelector('.cs-trigger').onclick = (e) => {
@@ -362,42 +362,42 @@ class CountrySelect {
             this._toggle();
         };
 
- this.wrapper.addEventListener('keydown', (e) => {
-    if (!this.isOpen && (e.key === 'ArrowDown')) {
-        e.preventDefault();
-        this._toggle(true);
-        return;
-    }
-    
-    if (this.isOpen) {
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παρακάτω;
-            if (this.activeIndex < this.filteredCountries.length - 1) {
-                this.activeIndex++;
-                this._updateActiveElement();
-                this._scrollToActive();
+        this.wrapper.addEventListener('keydown', (e) => {
+            if (!this.isOpen && (e.key === 'ArrowDown')) {
+                e.preventDefault();
+                this._toggle(true);
+                return;
             }
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παραπάνω;
-            if (this.activeIndex > 0) {
-                this.activeIndex--;
-                this._updateActiveElement();
-                this._scrollToActive();
+
+            if (this.isOpen) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παρακάτω;
+                    if (this.activeIndex < this.filteredCountries.length - 1) {
+                        this.activeIndex++;
+                        this._updateActiveElement();
+                        this._scrollToActive();
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    // ΕΛΕΓΧΟΣ: Μπορούμε να πάμε παραπάνω;
+                    if (this.activeIndex > 0) {
+                        this.activeIndex--;
+                        this._updateActiveElement();
+                        this._scrollToActive();
+                    }
+                } else if (e.key === 'Escape') {
+                    this._toggle(false);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Εδώ πρέπει να είμαστε σίγουροι ότι το activeIndex είναι έγκυρο
+                    if (this.activeIndex >= 0 && this.activeIndex < this.filteredCountries.length) {
+                        this._select(this.filteredCountries[this.activeIndex]);
+                    }
+                }
             }
-        } else if (e.key === 'Escape') {
-            this._toggle(false);
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            // Εδώ πρέπει να είμαστε σίγουροι ότι το activeIndex είναι έγκυρο
-            if (this.activeIndex >= 0 && this.activeIndex < this.filteredCountries.length) {
-                this._select(this.filteredCountries[this.activeIndex]);
-            }
-        }
-    }
-});
-        
+        });
+
         if (this.hasSearch) {
             this.wrapper.querySelector('.cs-search-input').oninput = (e) => {
                 const term = e.target.value.toLowerCase();
@@ -417,14 +417,22 @@ class CountrySelect {
         });
     }
 
-    _scrollToActive() {
+    /**
+     * Scroll της λίστας στην επιλεγμένη χώρα.
+     * 6.1.4: fromTop (άνοιγμα της λίστας) — αν η επιλεγμένη φαίνεται ήδη από την αρχή της λίστας, η λίστα ξεκινά από την αρχή
+     * (πριν: κεντράριζε ΠΑΝΤΑ → με επιλεγμένη την 3η χώρα, π.χ. Greece μετά από Bulgaria · Cyprus, κρυβόταν η 1η / οι προτιμώμενες).
+     * Θέση μέσα στη λίστα από τα getBoundingClientRect (το offsetTop μετρά από το .cs-dropdown — μαζί με το πεδίο αναζήτησης).
+     */
+    _scrollToActive(fromTop = false) {
         const list = this.wrapper.querySelector('.cs-list');
-        const options = list.querySelectorAll('.cs-option');
-        const activeItem = options[this.activeIndex];
-        if (activeItem) {
-            const scrollPos = activeItem.offsetTop - (list.offsetHeight / 2) + (this.rowHeight / 2);
-            list.scrollTop = scrollPos;
+        const activeItem = list.querySelectorAll('.cs-option')[this.activeIndex];
+        if (!activeItem) return;
+        const top = activeItem.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+        if (fromTop && top + activeItem.offsetHeight <= list.clientHeight) {
+            list.scrollTop = 0;
+            return;
         }
+        list.scrollTop = top - (list.clientHeight / 2) + (activeItem.offsetHeight / 2);
     }
 }
 

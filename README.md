@@ -39,7 +39,7 @@ https://nikmauro.github.io/country-select-pro/docs/
 Include the script via **jsDelivr**:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.1.3/dist/country-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.1.4/dist/country-select.min.js"></script>
 ```
 
 ---
