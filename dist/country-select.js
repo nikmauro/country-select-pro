@@ -1,6 +1,6 @@
-/*! CountrySelect Pro v6.3.0 | MIT | https://github.com/nikmauro/country-select-pro */
+/*! CountrySelect Pro v6.3.1 | MIT | https://github.com/nikmauro/country-select-pro */
 /**
- * CountrySelect Pro v6.3.0
+ * CountrySelect Pro v6.3.1
  * ---------------------------------------------------------------------------
  * Vanilla JS country selector — zero dependencies
  * - Bootstrap 5 ή χωρίς framework: θέμα με CSS μεταβλητές --cs-* (fallback στις --bs-*, άρα και dark mode του Bootstrap)
@@ -18,7 +18,7 @@
     if (typeof document === 'undefined') return;
     if (global.CountrySelect && global.CountrySelect.version) return; // ήδη φορτωμένο στη σελίδα — ένα αντίγραφο αρκεί
 
-    const VERSION = '6.3.0';
+    const VERSION = '6.3.1';
     const DEFAULT_BASE_URL = 'https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/';
 
     /* ---------------------------------------------------------------- βοηθητικά */
@@ -199,7 +199,7 @@
         globalBound = true;
         document.addEventListener('click', (e) => {
             instances.forEach((inst) => {
-                if (!inst.input.isConnected) return inst.destroy(); // βγήκε από τη σελίδα (htmx swap κ.λπ.) → καθάρισμα
+                if (!inst.input.isConnected) return inst.destroy(true); // βγήκε από τη σελίδα (htmx swap κ.λπ.) → καθάρισμα
                 if (inst.isOpen && !inst.wrapper.contains(e.target)) inst.close();
             });
         });
@@ -220,13 +220,14 @@
                 return;
             }
 
+            delete el._csOff; // ρητό new μετά από destroy() → ξανά και αυτόματα (htmx κ.λπ.)
             // Ήδη ενεργό στο ίδιο στοιχείο → το ίδιο instance (με νέες options: ξανά από την αρχή με αυτές)
             if (CountrySelect._isLive(el)) {
                 if (!Object.keys(o).length) return el._countrySelect;
-                el._countrySelect.destroy();
+                el._countrySelect.destroy(true);
             }
             // Παλιό instance που έχασε το wrapper του (π.χ. morph του htmx) ή αντίγραφο HTML (cloneNode, ιστορικό htmx) → καθάρισμα και ξανά
-            if (el._countrySelect) el._countrySelect.destroy();
+            if (el._countrySelect) el._countrySelect.destroy(true);
             const stale = el.nextElementSibling;
             if (stale && stale.classList.contains('cs-wrapper')) stale.remove();
 
@@ -286,7 +287,9 @@
 
         static _isLive(el) {
             const inst = el && el._countrySelect;
-            return !!(inst && !inst._destroyed && el.dataset.csInitialized === '1' && inst.wrapper && inst.wrapper.isConnected);
+            const w = inst && inst.wrapper;
+            // + το wrapper να είναι ακόμα δικό μας: το morph του htmx μπορεί να το έχει μετατρέψει σε άλλο <div> του server
+            return !!(inst && !inst._destroyed && el.dataset.csInitialized === '1' && w && w.isConnected && w._csOwner === inst && w.classList.contains('cs-wrapper'));
         }
 
         async _init() {
@@ -308,6 +311,7 @@
 
             const w = this.wrapper = document.createElement('div');
             w.className = 'cs-wrapper';
+            w._csOwner = this;
             w.tabIndex = 0;
             w.setAttribute('role', 'combobox');
             w.setAttribute('aria-haspopup', 'listbox');
@@ -658,7 +662,7 @@
 
         _syncDisabled() {
             const dis = this._isDisabled(), w = this.wrapper;
-            if (!w) return;
+            if (!w || w._csOwner !== this || !w.classList.contains('cs-wrapper')) return; // όχι σε στοιχείο που έκανε άλλο το morph
             w.classList.toggle('cs-disabled', dis);
             w.tabIndex = dis ? -1 : 0;
             if (dis) w.setAttribute('aria-disabled', 'true'); else w.removeAttribute('aria-disabled');
@@ -868,7 +872,11 @@
             return this;
         }
 
-        destroy() {
+        /**
+         * Αφαιρεί το control και επαναφέρει το input. Το στοιχείο δεν ξαναστήνεται αυτόματα (htmx κ.λπ.) — new CountrySelect(el) το ξαναστήνει.
+         * @param {boolean} [internal] εσωτερικά (πριν από νέο init): χωρίς να σταματήσει το αυτόματο init
+         */
+        destroy(internal) {
             if (this._destroyed) return;
             this.close();
             this._destroyed = true;
@@ -877,8 +885,14 @@
             if (this._mo) this._mo.disconnect();
             clearTimeout(this._liveTimer);
             instances.delete(this);
-            if (this.wrapper && this.wrapper.parentNode) this.wrapper.remove();
+            const w = this.wrapper;
+            // Μόνο αν είναι ακόμα το δικό μας .cs-wrapper: το morph του htmx μπορεί να το έχει κάνει άλλο στοιχείο του server (π.χ. μήνυμα λάθους)
+            if (w && w._csOwner === this) {
+                if (w.parentNode && w.classList.contains('cs-wrapper')) w.remove();
+                delete w._csOwner;
+            }
             const el = this.input;
+            if (!internal) el._csOff = true;
             if (el._countrySelect === this) delete el._countrySelect;
             delete el.dataset.csInitialized;
             if (this._orig) {
@@ -902,8 +916,17 @@
         if (root.matches && root.matches('.country-select')) els.push(root);
         root.querySelectorAll('.country-select').forEach((el) => els.push(el));
         els.forEach((el) => {
-            if ((el.tagName === 'INPUT' || el.tagName === 'SELECT') && !CountrySelect._isLive(el)) new CountrySelect(el);
+            if ((el.tagName === 'INPUT' || el.tagName === 'SELECT') && !el._csOff && !CountrySelect._isLive(el)) new CountrySelect(el);
         });
+    };
+
+    // Στοιχείο που έμεινε στη σελίδα αλλά έχασε το control (morph του htmx: ίδιο <input>, χωρίς data-cs-initialized / style / wrapper)
+    // → ξανά ΑΜΕΣΩΣ (μέσα στο ίδιο task), πριν ζωγραφίσει ο browser το σκέτο input
+    const revive = (el) => {
+        if (!el || !el.isConnected || el._csOff || CountrySelect._isLive(el)) return;
+        if (el.tagName !== 'INPUT' && el.tagName !== 'SELECT') return;
+        const old = el._countrySelect;
+        if (old || el.classList.contains('country-select')) new CountrySelect(el, old ? old.options : undefined);
     };
 
     CountrySelect.init = initCS;
@@ -914,13 +937,25 @@
 
     function setup() {
         initCS(document);
-        document.addEventListener('htmx:afterSettle', (e) => initCS((e.detail && e.detail.target) || e.target));
+        const onHtmx = (e) => initCS((e.detail && e.detail.target) || e.target);
+        document.addEventListener('htmx:afterSwap', onHtmx);
+        document.addEventListener('htmx:afterSettle', onHtmx);
         new MutationObserver((mutations) => {
-            mutations.forEach((mu) => mu.addedNodes.forEach((node) => {
-                if (node.nodeType !== 1 || node.closest('.cs-wrapper')) return; // τα δικά μας (επιλογές της λίστας κ.λπ.)
-                initCS(node);
-            }));
-        }).observe(document.documentElement, {childList: true, subtree: true});
+            mutations.forEach((mu) => {
+                // morph: αφαιρέθηκε το data-cs-initialized από το ίδιο input
+                if (mu.type === 'attributes') return revive(mu.target);
+                // αφαιρέθηκε το wrapper: ξανά, αν το input έμεινε στη σελίδα — αλλιώς καθάρισμα
+                mu.removedNodes.forEach((node) => {
+                    const inst = node.nodeType === 1 && node._csOwner;
+                    if (!inst) return;
+                    if (inst.input.isConnected) revive(inst.input); else inst.destroy(true);
+                });
+                mu.addedNodes.forEach((node) => {
+                    if (node.nodeType !== 1 || node.closest('.cs-wrapper')) return; // τα δικά μας (επιλογές της λίστας κ.λπ.)
+                    initCS(node);
+                });
+            });
+        }).observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-cs-initialized']});
     }
 
     global.CountrySelect = CountrySelect;

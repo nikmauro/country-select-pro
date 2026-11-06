@@ -2,6 +2,13 @@
 
 All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [6.3.1] – 2026-11-06
+
+### Fixed
+- **htmx morph (idiomorph): no more flash of the raw input.** The morph keeps the same `<input>` but removes the control and the attributes that hide the input; it was re-initialized only on `htmx:afterSettle`, so the browser painted the plain input for a moment. It is now re-initialized immediately (same task, before paint) when the control or `data-cs-initialized` disappears; `htmx:afterSwap` is handled too.
+- **htmx morph could delete a server element next to the selector** (e.g. a field error message): idiomorph may turn the old `.cs-wrapper` into the next `<div>` of the new HTML, and the re-init removed it. Only an element that is still the library's own `.cs-wrapper` is removed now.
+- `destroy()` by the developer is final: the element is no longer re-initialized automatically (htmx, `CountrySelect.init`) – `new CountrySelect(el)` sets it up again.
+
 ## [6.3.0] – 2026-11-06
 
 ### Added
@@ -82,6 +89,7 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 - First releases: search, templates (`data-schema`, `data-schema-return`), phone / code values, dropdown width, row count.
 
+[6.3.1]: https://github.com/nikmauro/country-select-pro/compare/6.3.0...6.3.1
 [6.3.0]: https://github.com/nikmauro/country-select-pro/compare/6.2.0...6.3.0
 [6.2.0]: https://github.com/nikmauro/country-select-pro/compare/6.1.4...6.2.0
 [6.1.4]: https://github.com/nikmauro/country-select-pro/compare/6.1.3...6.1.4

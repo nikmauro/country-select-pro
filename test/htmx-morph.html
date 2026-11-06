@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Test: htmx morph — no flash of the raw input</title>
+    <!-- ίδιες εκδόσεις με το cms39 -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idiomorph@0.8.0/dist/idiomorph-ext.min.js"></script>
+</head>
+<body hx-ext="morph" style="font-family:system-ui;max-width:560px;margin:32px auto">
+<h1>htmx morph</h1>
+<form id="f" hx-get="htmx-morph-partial.html" hx-trigger="go" hx-target="#zone" hx-swap="morph:innerHTML">
+    <div id="zone">
+        <div class="field"><input type="text" class="country-select" name="country" value="GR" aria-label="Country"><div class="err">Error A</div></div>
+        <div class="note">before</div>
+    </div>
+</form>
+<button type="button" id="go">morph</button>
+<pre id="out"></pre>
+<script src="../dist/country-select.js"></script>
+<script>
+    // Τι ζωγραφίζει ο browser στο ΠΡΩΤΟ frame μετά το swap
+    window.__frames = [];
+    document.body.addEventListener('htmx:afterSwap', function () {
+        var check = function (tag) {
+            var el = document.querySelector('#zone .country-select');
+            window.__frames.push(tag + ': live=' + !!CountrySelect.getInstance(el) + ' inputVisible=' + (getComputedStyle(el).opacity !== '0') + ' wrappers=' + document.querySelectorAll('#zone .cs-wrapper').length + ' err=' + JSON.stringify((document.querySelector('#zone .err') || {}).textContent));
+        };
+        check('afterSwap');
+        requestAnimationFrame(function () { check('frame1'); requestAnimationFrame(function () { check('frame2'); }); });
+    });
+    document.getElementById('go').onclick = function () { htmx.trigger('#f', 'go'); };
+</script>
+</body>
+</html>

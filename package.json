@@ -1,6 +1,6 @@
 {
   "name": "country-select-pro",
-  "version": "6.3.0",
+  "version": "6.3.1",
   "description": "Lightweight, zero-dependency vanilla JS country selector: flags, phone codes, search, custom lists, ARIA, Bootstrap 5 or plain CSS.",
   "main": "dist/country-select.js",
   "module": "dist/country-select.mjs",
@@ -55,6 +55,7 @@
     "gulp-cli": "^3.1.0",
     "gulp-rename": "^2.1.0",
     "gulp-terser": "^2.1.0",
+    "libphonenumber-js": "^1.13.15",
     "typescript": "^5.9.3"
   },
   "sideEffects": true

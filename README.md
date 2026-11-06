@@ -36,13 +36,13 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 ### CDN
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.0/dist/country-select.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.1/dist/country-select.min.js" defer></script>
 ```
 
 The CSS is included in the script. For a strict **Content Security Policy** (no `'unsafe-inline'` styles) load the stylesheet instead – the script detects it and adds no `<style>`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.0/dist/country-select.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-pro@6.3.1/dist/country-select.min.css">
 ```
 
 (The arrow is an SVG `data:` image: allow `img-src data:`; flags and the country list come from `cdn.jsdelivr.net` unless you [self-host](#-seo--performance) them.)
