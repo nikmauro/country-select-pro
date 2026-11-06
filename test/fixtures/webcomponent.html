@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fixture: &lt;country-select&gt;</title>
+    <script src="/node_modules/htmx.org/dist/htmx.min.js"></script>
+    <script src="/node_modules/idiomorph/dist/idiomorph-ext.min.js"></script>
+    <style>body { font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto; } .row { margin: 0 0 14px; }</style>
+</head>
+<body hx-ext="morph">
+<main>
+    <h1>&lt;country-select&gt;</h1>
+    <form id="form" novalidate>
+        <div class="row">
+            <label for="country">Country</label>
+            <country-select id="country" name="country" value="GR" preferred="GR,CY"></country-select>
+        </div>
+        <div class="row"><country-select id="req" name="req" required aria-label="Required"></country-select></div>
+        <div class="row"><country-select id="phone" name="phone_code" value="+357" value-type="phone" schema-return="{img} {phone}" aria-label="Phone code"></country-select></div>
+        <div class="row"><country-select id="el" name="el" value="CY" lang="el" only-countries="GR,CY,DE" search="false" aria-label="Χώρα"></country-select></div>
+        <fieldset id="fs">
+            <country-select id="in-fs" name="in_fs" value="IT" aria-label="In fieldset"></country-select>
+        </fieldset>
+        <button type="reset" id="reset">Reset</button>
+    </form>
+
+    <form id="f2" hx-get="/test/fixtures/webcomponent-partial.html" hx-trigger="go" hx-target="#zone" hx-swap="morph:innerHTML">
+        <div id="zone"><country-select id="morph" name="m" value="GR" aria-label="Morph"></country-select><div class="err">Error A</div></div>
+    </form>
+
+    <div id="clones"><country-select name="c" value="ES" aria-label="Clone"></country-select></div>
+</main>
+<script src="load.js"></script>
+</body>
+</html>

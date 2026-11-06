@@ -132,6 +132,8 @@ export declare class CountrySelect {
     static init(root?: ParentNode | Element | Document): void;
     /** The live instance of an element, or null. */
     static getInstance(element: Element | string | null | undefined): CountrySelect | null;
+    /** The <country-select> element class (null where custom elements / ElementInternals are not available). */
+    static readonly Element: typeof CountrySelectElement | null;
 
     /** The original input / select (kept as the form field). */
     readonly input: HTMLInputElement | HTMLSelectElement;
@@ -156,6 +158,28 @@ export declare class CountrySelect {
     destroy(): void;
 }
 
+/**
+ * `<country-select>` — form-associated custom element. Attributes = the data-* options without "data-"
+ * (value-type, preferred, only-countries, lang, src, countries …) plus name, value, required, disabled, readonly.
+ */
+export declare class CountrySelectElement extends HTMLElement {
+    static readonly formAssociated: true;
+    /** Value (code / calling code / name according to value-type). Setting it sends no events. */
+    value: string;
+    /** {code, name, localName, phone, value} or null */
+    readonly country: CountrySelectCountry | null;
+    /** The CountrySelect instance (open, close, setCountries …) */
+    readonly instance: CountrySelect | null;
+    readonly form: HTMLFormElement | null;
+    readonly name: string | null;
+    readonly type: 'country-select';
+    readonly validity: ValidityState;
+    readonly validationMessage: string;
+    readonly willValidate: boolean;
+    checkValidity(): boolean;
+    reportValidity(): boolean;
+}
+
 export default CountrySelect;
 
 declare global {
@@ -165,5 +189,8 @@ declare global {
     }
     interface HTMLElementEventMap {
         'country-change': CustomEvent<CountryChangeDetail>;
+    }
+    interface HTMLElementTagNameMap {
+        'country-select': CountrySelectElement;
     }
 }

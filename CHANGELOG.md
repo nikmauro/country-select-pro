@@ -4,6 +4,11 @@ All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](
 
 ## [Unreleased]
 
+### Added
+- **Web Component `<country-select>`**: a form-associated custom element (ElementInternals) – the value is submitted with its `name`; `required` (validation message from the browser, focus on the visible control), form reset, `disabled` / disabled `<fieldset>`, `readonly` and `<label for>` work natively. Options as attributes (the `data-*` names without `data-`); properties `value`, `country`, `instance`, `validity`, `checkValidity()`, `reportValidity()`; events bubble from the element. Rebuilt immediately after htmx morph / cloning; reserves its height before the script loads. TypeScript: `CountrySelectElement`, `HTMLElementTagNameMap['country-select']`.
+- `CountrySelect.getInstance()` accepts a `<country-select>` element.
+
+
 ## [6.5.0] – 2026-11-06
 
 ### Added

@@ -349,6 +349,31 @@ new CountrySelect('#country', { preferredCountries: ['GR', 'CY'] });</pre></div>
                 </div></article>
             </div>
 
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-webcomponent"><div class="card-body">
+                    <h3 class="card-title">Web Component &lt;country-select&gt;</h3>
+                    <p class="card-text">A real form field: submitted with its <code>name</code>; <code>required</code>, reset, <code>&lt;label for&gt;</code> and disabled <code>&lt;fieldset&gt;</code> work natively. Press Submit with nothing selected.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <form novalidate>
+                            <label class="form-label" for="wc-country">Country</label>
+                            <country-select id="wc-country" name="country" preferred="GR,CY" required></country-select>
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+                            <code class="small ms-2" id="wc-out"></code>
+                        </form>
+                    </template>
+                    <script type="text/x-example">
+                        const form = document.querySelector('#ex-webcomponent form');
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            if (!form.reportValidity()) return; // το μήνυμα του browser δείχνει το control
+                            document.getElementById('wc-out').textContent = new URLSearchParams(new FormData(form)).toString();
+                        });
+                    </script>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
         </div>
 
         <p class="mt-4 mb-0">More: <a href="examples/htmx.html">htmx (swap, morph, history)</a> · <a href="examples/plain.html">without any framework</a> · <a href="examples/api.html">JavaScript API</a> · <a href="examples/">all examples</a></p>

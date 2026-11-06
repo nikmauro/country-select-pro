@@ -436,6 +436,11 @@ ZW|Zimbabwe|263
 .cs-flag-img { display: inline-block; width: 22px !important; height: 16px !important; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border-radius: 2px; }
 .cs-wrapper img { width: 20px !important; height: 14px !important; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
 .cs-hidden { display: none !important; }
+/* <country-select>: block · χώρος πριν φορτώσει το JS (χωρίς μετακίνηση της σελίδας) · validation */
+country-select { display: block; }
+country-select:not(:defined) { min-height: calc(1.5em + .75rem + 2px); }
+.input-group > country-select { flex: 1 1 auto; width: 1%; min-width: 0; }
+.was-validated country-select:invalid .cs-trigger { border-color: var(--cs-invalid, var(--bs-form-invalid-border-color, #dc3545)) !important; }
 .cs-sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 @media (prefers-reduced-motion: reduce) { .cs-trigger, .cs-trigger::after, .cs-option { transition: none; } }
@@ -1269,9 +1274,191 @@ ZW|Zimbabwe|263
 
     CountrySelect.init = initCS;
     CountrySelect.getInstance = (el) => {
-        const node = typeof el === 'string' ? document.querySelector(el) : el;
+        let node = typeof el === 'string' ? document.querySelector(el) : el;
+        if (node && node._csInput) node = node._csInput; // <country-select>
         return node && CountrySelect._isLive(node) ? node._countrySelect : null;
     };
+
+    /* ---------------------------------------------------------------- Web Component <country-select> */
+    // Form-associated custom element (ElementInternals): η τιμή στη φόρμα με το name του στοιχείου, required / validation,
+    // reset, disabled (και σε disabled <fieldset>), <label for>. Light DOM: ισχύουν το CSS / τα θέματα όπως στο input.
+
+    // attribute → option (ίδια με τα data-* του input, χωρίς «data-»)
+    const CE_ATTRS = {
+        'value-type': 'valueType', schema: 'schema', 'schema-return': 'schemaReturn', preferred: 'preferredCountries',
+        'only-countries': 'onlyCountries', 'exclude-countries': 'excludeCountries', 'default-country': 'defaultCountry',
+        placeholder: 'placeholder', search: 'search', 'search-placeholder': 'searchPlaceholder', 'no-results': 'noResults',
+        rows: 'rows', 'dropdown-width': 'dropdownWidth', lang: 'lang', flags: 'flags', sort: 'sort', countries: 'countries',
+        src: 'dataUrl', 'base-url': 'baseUrl', 'flag-path': 'flagPath', popover: 'popover'
+    };
+
+    // Το μήνυμα «συμπληρώστε το πεδίο» στη γλώσσα του browser
+    let requiredMessage = '';
+    const valueMissingMessage = () => {
+        if (!requiredMessage) {
+            const probe = document.createElement('input');
+            probe.required = true;
+            requiredMessage = probe.validationMessage || 'Please select an item in the list.';
+        }
+        return requiredMessage;
+    };
+
+    const CE = global.customElements && typeof global.ElementInternals === 'function' ? class CountrySelectElement extends HTMLElement {
+        static get formAssociated() {
+            return true;
+        }
+
+        static get observedAttributes() {
+            return ['value', 'disabled', 'readonly', 'required'];
+        }
+
+        constructor() {
+            super();
+            this._internals = this.attachInternals();
+        }
+
+        connectedCallback() {
+            if (!this._csInput || !this.contains(this._csInput) || !this._cs || !CountrySelect._isLive(this._csInput)) this._setup();
+            if (!this._mo) {
+                // morph του htmx / αλλαγές απ' έξω: αν χαθεί το input ή το control → ξανά, πριν ζωγραφίσει ο browser
+                this._mo = new MutationObserver(() => {
+                    if (this.isConnected && (!this.contains(this._csInput) || !CountrySelect._isLive(this._csInput))) this._setup();
+                });
+                this._mo.observe(this, {childList: true});
+            }
+        }
+
+        disconnectedCallback() {
+            if (this._mo) this._mo.disconnect();
+            this._mo = null;
+        }
+
+        _setup() {
+            if (this._cs) this._cs.destroy(true);
+            this.replaceChildren(); // ό,τι είχε μείνει (αντίγραφο HTML, morph)
+            const input = this._csInput = document.createElement('input');
+            input.type = 'text';
+            input.className = 'cs-ce-input';
+            const value = this.getAttribute('value') || '';
+            input.value = value;
+            input.defaultValue = value; // reset της φόρμας → η αρχική τιμή
+            const label = this.getAttribute('aria-label') || Array.from(this._internals.labels || []).map((l) => l.textContent.trim()).join(' ');
+            if (this.getAttribute('aria-labelledby')) input.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
+            else if (label) input.setAttribute('aria-label', label);
+            if (this.getAttribute('aria-describedby')) input.setAttribute('aria-describedby', this.getAttribute('aria-describedby'));
+            input.disabled = this.hasAttribute('disabled') || !!this._fieldsetDisabled;
+            input.readOnly = this.hasAttribute('readonly');
+            this.appendChild(input);
+
+            const options = {};
+            Object.keys(CE_ATTRS).forEach((attr) => {
+                if (this.hasAttribute(attr)) options[CE_ATTRS[attr]] = this.getAttribute(attr);
+            });
+            const cs = this._cs = new CountrySelect(input, options);
+            if (this.hasAttribute('required')) cs.wrapper.setAttribute('aria-required', 'true');
+            input.addEventListener('change', () => this._sync());
+            cs.ready.then(() => this._sync());
+            this._sync();
+
+            // <label for> → το ορατό control
+            Array.from(this._internals.labels || []).forEach((lab) => {
+                if (lab._csBound) return;
+                lab._csBound = true;
+                lab.addEventListener('click', (e) => {
+                    if (this.contains(e.target) || !this._cs || this._cs._isDisabled()) return;
+                    e.preventDefault();
+                    this._cs.wrapper.focus();
+                });
+            });
+            if (!this._invalidBound) {
+                this._invalidBound = true;
+                this.addEventListener('invalid', () => {
+                    if (!this._cs) return;
+                    this._cs.wrapper.classList.add('is-invalid');
+                    this._cs.wrapper.setAttribute('aria-invalid', 'true');
+                });
+            }
+        }
+
+        _sync() {
+            if (!this._csInput) return;
+            const v = this._csInput.value;
+            this._internals.setFormValue(v);
+            if (this.hasAttribute('required') && !v && !this._csInput.disabled) {
+                this._internals.setValidity({valueMissing: true}, valueMissingMessage(), this._cs ? this._cs.wrapper : undefined);
+            } else {
+                this._internals.setValidity({});
+            }
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (!this._cs || oldValue === newValue) return;
+            if (name === 'value') {
+                if (str(newValue) !== this.value) this._cs.setValue(str(newValue), {silent: true});
+            } else if (name === 'disabled') {
+                this._csInput.disabled = newValue != null || !!this._fieldsetDisabled;
+            } else if (name === 'readonly') {
+                this._csInput.readOnly = newValue != null;
+            } else if (name === 'required') {
+                if (newValue != null) this._cs.wrapper.setAttribute('aria-required', 'true'); else this._cs.wrapper.removeAttribute('aria-required');
+            }
+            this._sync();
+        }
+
+        formResetCallback() {
+            if (!this._cs) return;
+            this._cs.setValue(this.getAttribute('value') || '', {silent: true});
+            this._cs.wrapper.classList.remove('is-invalid');
+            this._cs.wrapper.removeAttribute('aria-invalid');
+            this._sync();
+        }
+
+        formDisabledCallback(disabled) {
+            this._fieldsetDisabled = disabled;
+            if (this._csInput) this._csInput.disabled = disabled || this.hasAttribute('disabled');
+            this._sync();
+        }
+
+        formStateRestoreCallback(state) {
+            if (typeof state === 'string') this.value = state;
+        }
+
+        /** Η τιμή (κωδικός / κωδικός κλήσης / όνομα, ανάλογα με το value-type) */
+        get value() {
+            return this._csInput ? this._csInput.value : (this.getAttribute('value') || '');
+        }
+
+        set value(v) {
+            if (this._cs) {
+                this._cs.setValue(str(v), {silent: true});
+                this._sync();
+            } else {
+                this.setAttribute('value', str(v));
+            }
+        }
+
+        /** {code, name, localName, phone, value} ή null */
+        get country() {
+            return this._cs ? this._cs.getCountry() : null;
+        }
+
+        /** Το instance του CountrySelect (open, close, setCountries …) */
+        get instance() {
+            return this._cs || null;
+        }
+
+        get form() { return this._internals.form; }
+        get name() { return this.getAttribute('name'); }
+        get type() { return 'country-select'; }
+        get validity() { return this._internals.validity; }
+        get validationMessage() { return this._internals.validationMessage; }
+        get willValidate() { return this._internals.willValidate; }
+        checkValidity() { return this._internals.checkValidity(); }
+        reportValidity() { return this._internals.reportValidity(); }
+    } : null;
+
+    if (CE && !global.customElements.get('country-select')) global.customElements.define('country-select', CE);
+    CountrySelect.Element = CE;
 
     function setup() {
         initCS(document);

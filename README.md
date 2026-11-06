@@ -20,6 +20,7 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 * 🌐 **Localized names** – country names in any language via `Intl.DisplayNames` (`data-lang="el"`).
 * ♿ **Accessible** – ARIA combobox / listbox, full keyboard support, live result count, forced-colors and reduced-motion support.
 * ⚡ **SEO & performance friendly** – progressive enhancement with `<select>`, the country list inside the script (no data request), lazy flags with fixed size (no layout shift), self-hosting option.
+* 🧩 **Web Component** – `<country-select name="country" required>`: a real form field (value, validation, reset, label, disabled fieldset).
 * 🪟 **Works in modals** – the list opens in the top layer (Popover API): not clipped by Bootstrap modals / offcanvas, `<dialog>` or `overflow: hidden`, and the modal's focus trap and <kbd>Esc</kbd> keep working.
 * 🔁 **htmx ready** – auto-init on swapped / morphed / cloned content.
 
@@ -85,6 +86,21 @@ Add the class `country-select` – that's it. The value of the input is the ISO 
 <input type="text" class="country-select" name="phone_code" value="+30"
        data-value-type="phone" data-schema-return="{img} {phone}">
 ```
+
+### Web Component `<country-select>`
+
+A real form field: the value is submitted with its `name`, and `required`, form reset, `disabled` (also inside a disabled `<fieldset>`) and `<label for>` work natively – the browser's "please fill out this field" points at the visible control.
+
+```html
+<form>
+  <label for="country">Country</label>
+  <country-select id="country" name="country" value="GR" preferred="GR,CY" required></country-select>
+
+  <country-select name="phone_code" value="+30" value-type="phone" schema-return="{img} {phone}" aria-label="Phone code"></country-select>
+</form>
+```
+
+Attributes are the `data-*` options below without `data-` (`value-type`, `preferred`, `only-countries`, `lang`, `src`, `countries`, `popover` …). Properties: `el.value`, `el.country`, `el.instance` (the API below); events: `change`, `input`, `country-change`. Works with htmx swaps / morph; reserves its height before the script loads (no layout shift).
 
 ### Progressive enhancement with `<select>` (recommended for SEO / no-JS)
 

@@ -36,5 +36,11 @@ inst?.destroy();
 window.CountrySelectConfig = {css: false, autoInit: true, lang: 'auto'};
 console.log(CountrySelect.version, window.CountrySelect.baseUrl);
 
+const ce = document.createElement('country-select');
+ce.value = 'GR';
+const ceCode: string | undefined = ce.country?.code;
+const ceOk: boolean = ce.checkValidity() && !!ce.instance && !!CountrySelect.Element;
+console.log(ceCode, ceOk, ce.form, ce.validity.valueMissing);
+
 // @ts-expect-error — μη έγκυρος valueType
 new CountrySelect(input, {valueType: 'iso'});
