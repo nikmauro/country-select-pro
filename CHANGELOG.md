@@ -1,0 +1,82 @@
+# Changelog
+
+All notable changes to CountrySelect Pro. Versions follow [Semantic Versioning](https://semver.org/).
+
+## [6.2.0] – 2026-11-06
+
+### Fixed
+- **Keyboard selection picked the wrong country** when preferred countries or a search were active (Enter on *Greece* selected *Albania*): the index of the visible list is now used.
+- Shared phone codes resolve to the main country: `+1` → United States, `+44` → United Kingdom, `+7` → Russia … (preferred countries first) – was the first one alphabetically (American Samoa, Guernsey …). A selected country with a shared code (e.g. Canada `+1`) stays selected.
+- `data-value-type="name"`: the selected country is highlighted when the list opens; ISO codes are matched case-insensitively (`gr` = `GR`).
+- One request for `data.json` per page instead of one per selector; an error message instead of an endless "Loading..." when it fails.
+- Cloned HTML (`cloneNode`, htmx history) and htmx morph swaps re-initialize instead of leaving a dead dropdown; no more document listeners left behind by removed selectors.
+- <kbd>Esc</kbd> no longer closes the surrounding Bootstrap modal / offcanvas; `disabled` and `readonly` are respected; the hidden input is no longer an invisible <kbd>Tab</kbd> stop.
+- `new CountrySelect('#selector', options)` works as documented (selector string, `defaultCountry`, `preferredCountries`, `onlyCountries`, `search`).
+- Search box no longer broken by page CSS such as `input[type=text] { … }`; `box-sizing` / fonts work without Bootstrap.
+
+### Added
+- **Accessibility:** ARIA combobox / listbox, `aria-activedescendant`, labels from `aria-label`, `aria-labelledby` or `<label for>`; <kbd>Home</kbd> <kbd>End</kbd> <kbd>PgUp</kbd> <kbd>PgDn</kbd>, open with <kbd>Enter</kbd> / <kbd>Space</kbd> / typing; result count for screen readers; `forced-colors` and `prefers-reduced-motion` support; WCAG AA contrast.
+- **Custom lists:** `data-countries` (inline JSON), `data-src` (URL / ajax), `<select>` options (progressive enhancement), `countries` array or function, `setCountries()`; missing names / phone codes are filled from the built-in list.
+- **Search:** accent-insensitive (`cote`, `curacao`, `ελλαδα`), by ISO or phone code, aliases (`uk`, `usa`, `hellas` …), best matches first.
+- **Localized country names** with `data-lang` (`Intl.DisplayNames`), Greek UI texts for `el`.
+- **Theming:** `--cs-*` CSS variables falling back to Bootstrap's `--bs-*` (Bootstrap dark mode works out of the box), works without a framework, `window.CountrySelectConfig = {css: false}` for your own CSS.
+- Options: `onlyCountries`, `excludeCountries`, `defaultCountry`, `flags`, `sort`, `flagPath`, `baseUrl`, `searchPlaceholder`, `noResults`, global defaults via `window.CountrySelectConfig`.
+- API: `setValue`, `getValue`, `getCountry`, `open`, `close`, `toggle`, `refresh`, `destroy`, `ready`, `CountrySelect.getInstance`, `CountrySelect.init`; `country-change` carries `detail.country`.
+- Rotating arrow (follows the text color), selected option in bold, grey placeholder.
+
+### Changed
+- `dist/country-select.min.js` is built on `npm publish` and no longer kept in git (jsDelivr also minifies on the fly).
+- `jsdelivr` / `unpkg` fields point to the minified file.
+
+## [6.1.4] – 2026-11-06
+
+### Fixed
+- When the list opens and the selected country is already visible from the top (e.g. preferred `bg, cy, gr` with Greece selected), the list starts at the top instead of centering the selection – the first preferred countries are no longer hidden.
+
+## [6.1.3] – 2026-07-09
+
+### Fixed
+- Double initialization with htmx: the instance is marked before the asynchronous data load.
+
+### Added
+- 1x1 flags.
+
+## [6.1.2] – 2026-07-09
+
+### Changed
+- SVG flags (4x3) served from the repository instead of emoji flags; `baseUrl` for `data.json` and flags.
+
+## [6.1.1] – 2026-07-09
+
+### Added
+- Flag set (`dist/flags`), "Not found" message for empty searches.
+
+## [6.1] – 2026-07-08
+
+### Changed
+- Country data from `dist/data.json` (names, ISO codes, phone codes) on jsDelivr.
+
+## [5.6.x] – 2026-03-07
+
+### Changed
+- Bootstrap 5 look (sizes, colors, focus ring), SVG arrow, validation styles, htmx initialization guard.
+
+## [5.6] / [4.9.x] – 2026-03-07
+
+### Added
+- Preferred countries at the top of the list, drop-up near the bottom of the screen, htmx (`htmx:afterSettle`) and `MutationObserver` auto-initialization.
+
+## [4.8.x] – 2026-03-05
+
+- First releases: search, templates (`data-schema`, `data-schema-return`), phone / code values, dropdown width, row count.
+
+[6.2.0]: https://github.com/nikmauro/country-select-pro/compare/6.1.4...6.2.0
+[6.1.4]: https://github.com/nikmauro/country-select-pro/compare/6.1.3...6.1.4
+[6.1.3]: https://github.com/nikmauro/country-select-pro/compare/6.1.2...6.1.3
+[6.1.2]: https://github.com/nikmauro/country-select-pro/compare/6.1.1...6.1.2
+[6.1.1]: https://github.com/nikmauro/country-select-pro/compare/6.1...6.1.1
+[6.1]: https://github.com/nikmauro/country-select-pro/compare/v6...6.1
+[5.6.x]: https://github.com/nikmauro/country-select-pro/compare/5.6...5.6.4
+[5.6]: https://github.com/nikmauro/country-select-pro/compare/4.9.1...5.6
+[4.9.x]: https://github.com/nikmauro/country-select-pro/compare/4.8.1...4.9.1
+[4.8.x]: https://github.com/nikmauro/country-select-pro/releases/tag/4.8.1

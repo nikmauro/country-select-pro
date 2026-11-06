@@ -1,310 +1,695 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CountrySelect Pro - Vanilla JS Country Picker</title>
+    <title>CountrySelect Pro – Vanilla JS country picker with flags, phone codes &amp; search</title>
+    <meta name="description" content="Lightweight, zero-dependency vanilla JavaScript country selector: flags, phone codes, accent-insensitive search, custom lists (JSON, ajax, select), ARIA accessible, Bootstrap 5 or plain CSS, htmx ready.">
+    <link rel="canonical" href="https://nikmauro.github.io/country-select-pro/docs/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CountrySelect Pro – Vanilla JS country picker">
+    <meta property="og:description" content="Flags, phone codes, search, custom lists, accessible, Bootstrap 5 or plain CSS. Zero dependencies.">
+    <meta property="og:url" content="https://nikmauro.github.io/country-select-pro/docs/">
+    <meta name="theme-color" content="#0d6efd">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "CountrySelect Pro",
+        "description": "Lightweight, zero-dependency vanilla JavaScript country selector with flags, phone codes, search and custom lists.",
+        "codeRepository": "https://github.com/nikmauro/country-select-pro",
+        "programmingLanguage": "JavaScript",
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {"@type": "Person", "name": "Nikolaos Mavroeidis"}
+    }
+    </script>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        // θέμα πριν από το πρώτο render (χωρίς αναβόσβημα)
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('cs-demo-theme'); } catch (e) { /* χωρίς storage */ }
+            if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+            document.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
+        })();
+    </script>
 
     <style>
-
-        body {
-            background: #f8f9fa;
-            padding-top: 60px;
-            font-family: system-ui;
-        }
-
-        .demo-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            font-weight: 800;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #999;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .code-box {
-            background: #1e1e1e;
-            color: #ddd;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 13px;
-            overflow: auto;
-        }
-
-        .github-btn {
-            font-weight: 600;
-        }
-
+        body { background: var(--bs-tertiary-bg); }
+        .hero { padding: 3.5rem 0 2.5rem; text-align: center; }
+        .hero h1 { font-weight: 800; letter-spacing: -.02em; }
+        .section { padding: 2.5rem 0 1rem; scroll-margin-top: 4rem; }
+        .section > h2 { font-weight: 700; margin-bottom: .25rem; }
+        .section > .lead-sm { color: var(--bs-secondary-color); margin-bottom: 1.5rem; }
+        .card-demo { border: 0; border-radius: 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, .05); height: 100%; }
+        .card-demo .card-title { font-size: 1rem; font-weight: 700; }
+        .card-demo .card-text { color: var(--bs-secondary-color); font-size: .9rem; }
+        .ex-demo { margin-bottom: 1rem; }
+        .code-wrap { position: relative; }
+        pre.code { background: #1e1f24; color: #e6e6e6; border-radius: 10px; padding: 1rem; font-size: 12.5px; line-height: 1.55; margin: 0; max-height: 320px; overflow: auto; white-space: pre; }
+        .copy-btn { position: absolute; top: .4rem; right: .4rem; font-size: .75rem; padding: .1rem .5rem; opacity: .85; }
+        .table-opts code { white-space: nowrap; }
+        .table-opts td, .table-opts th { font-size: .9rem; vertical-align: top; }
+        .pg-out { font-size: .85rem; }
+        kbd { font-size: .8rem; }
+        #ex-phone .input-group > .cs-wrapper { flex: 0 0 8.5rem; width: auto; }
+        .navbar .nav-link { font-size: .9rem; }
     </style>
-
 </head>
 <body>
 
-<div class="container">
+<a class="visually-hidden-focusable position-absolute p-2 bg-body" href="#main">Skip to content</a>
 
-    <div class="text-center mb-5">
-
-        <h1>CountrySelect Pro 🌍</h1>
-
-        <p class="lead">
-            Lightweight Vanilla JavaScript Country Selector
-        </p>
-
-        <div class="mt-3">
-
-            <a href="https://github.com/nikmauro/country-select-pro"
-               class="btn btn-dark github-btn me-2"
-               target="_blank">
-                ⭐ View on GitHub
-            </a>
-
-            <a href="https://www.jsdelivr.com/package/npm/country-select-pro"
-               class="btn btn-outline-primary"
-               target="_blank">
-                📦 CDN Download
-            </a>
-
+<nav class="navbar navbar-expand-md sticky-top bg-body border-bottom" aria-label="Main">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">🌍 CountrySelect Pro</a>
+        <div class="d-flex align-items-center gap-1 flex-wrap">
+            <a class="nav-link px-2" href="#examples">Examples</a>
+            <a class="nav-link px-2" href="#playground">Playground</a>
+            <a class="nav-link px-2" href="#options">Options</a>
+            <a class="nav-link px-2" href="#api">API</a>
+            <a class="nav-link px-2" href="#theming">Theming</a>
+            <a class="nav-link px-2" href="https://github.com/nikmauro/country-select-pro/blob/main/CHANGELOG.md">Changelog</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary ms-1" id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
         </div>
-
     </div>
+</nav>
 
+<header class="hero">
+    <div class="container">
+        <h1 class="display-5">CountrySelect Pro</h1>
+        <p class="lead mb-1">Lightweight, zero-dependency vanilla JavaScript country selector</p>
+        <p class="text-body-secondary mb-4">Flags · phone codes · search · custom lists · accessible · Bootstrap 5 or plain CSS · htmx ready</p>
+        <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <a href="https://github.com/nikmauro/country-select-pro" class="btn btn-dark fw-semibold">⭐ GitHub</a>
+            <a href="https://www.npmjs.com/package/country-select-pro" class="btn btn-outline-danger fw-semibold">npm</a>
+            <a href="https://www.jsdelivr.com/package/npm/country-select-pro" class="btn btn-outline-primary fw-semibold">📦 jsDelivr</a>
+        </div>
+        <p class="small text-body-secondary mt-3 mb-0">Version <span data-version>6.2.0</span> · MIT</p>
+    </div>
+</header>
 
-    <div class="row justify-content-center">
+<main id="main" class="container pb-5">
 
-        <div class="col-lg-8">
+    <!-- INSTALL -->
+    <section class="section pt-0" id="install" aria-labelledby="install-h">
+        <h2 id="install-h">Installation</h2>
+        <p class="lead-sm">Add the script, then the class <code>country-select</code> to any input or select.</p>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="code-wrap"><pre class="code" data-copy>&lt;script src="https://cdn.jsdelivr.net/npm/country-select-pro@<span data-version>6.2.0</span>/dist/country-select.min.js" defer&gt;&lt;/script&gt;
 
+&lt;input type="text" class="country-select" name="country" value="GR"&gt;</pre></div>
+            </div>
+            <div class="col-lg-6">
+                <div class="code-wrap"><pre class="code" data-copy>npm install country-select-pro
 
-            <!-- INSTALL -->
+// auto-init + window.CountrySelect
+import 'country-select-pro';</pre></div>
+            </div>
+        </div>
+    </section>
 
-            <div class="demo-card">
+    <!-- EXAMPLES -->
+    <section class="section" id="examples" aria-labelledby="examples-h">
+        <h2 id="examples-h">Examples</h2>
+        <p class="lead-sm">Every demo below is live; the code under it is exactly the HTML that runs. More standalone pages in <a href="examples/">docs/examples</a>.</p>
 
-                <div class="section-title">Installation (CDN)</div>
+        <div class="row g-4">
 
-                <div class="code-box">
-
-                    &lt;script
-                    src="https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js" defer&gt;&lt;/script&gt;
-
-                </div>
-
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-basic"><div class="card-body">
+                    <h3 class="card-title">Country (ISO code)</h3>
+                    <p class="card-text">The input value is the ISO code (<code>GR</code>). Search ignores accents: try <em>cote</em> or <em>curacao</em>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <label class="form-label" for="ex-country">Country</label>
+                        <input type="text" class="country-select" id="ex-country" name="country" value="GR">
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
             </div>
 
-
-            <!-- DEMO 1 -->
-
-            <form action="#" method="GET">
-
-                <div class="demo-card">
-
-                    <div class="section-title">Phone Prefix + Bootstrap Input Group</div>
-
-                    <div class="input-group mb-3">
-
-                        <div class="input-group-text">
-
-                            <input
-                                    type="text"
-                                    class="country-select"
-                                    name="prefix"
-                                    value="+30"
-                                    data-preferred='gr, cy'
-                                    data-value-type="phone"
-                                    data-schema-return="{img} {phone}"
-                                    data-dropdown-width="300px"
-                                    required>
-                        
-
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-phone"><div class="card-body">
+                    <h3 class="card-title">Phone code + Bootstrap input group</h3>
+                    <p class="card-text"><code>data-value-type="phone"</code> stores <code>+30</code>. Search by number: type <em>357</em>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div class="input-group">
+                            <input type="text" class="country-select" name="phone_code" value="+30" aria-label="Country code"
+                                   data-value-type="phone" data-preferred="GR,CY"
+                                   data-schema="{img} {name} {phone}" data-schema-return="{img} {phone}"
+                                   data-dropdown-width="320px">
+                            <input type="tel" class="form-control" name="phone" placeholder="691 234 5678" aria-label="Phone number">
                         </div>
-
-                        <input
-                                type="text"
-                                class="form-control"
-                                placeholder="6912345678"
-                                required>
-
-                    </div>
-
-                </div>
-
-
-                <!-- DEMO 2 -->
-
-                <div class="demo-card">
-
-                    <div class="section-title">Full Country Selection (ISO Code)</div>
-
-                    <input
-                            type="text"
-                            class="country-select form-control"
-                            name="country"
-                            data-placeholder="Select Country"
-                            data-schema="{img} {name} ({code})"
-                            required>
-
-                </div>
-
-
-                <!-- DEMO 3 -->
-
-                <div class="demo-card">
-
-                    <div class="section-title">Preferred Countries (GR, CY)</div>
-
-                    <input
-                            type="text"
-                            class="country-select form-control"
-                            value="CY"
-                            data-preferred="GR,CY"
-                            data-schema-return="Selected: {img} {name}"
-                            data-country-row-values="8">
-
-                </div>
-
-
-                <!-- DEMO 4 -->
-
-                <div class="demo-card">
-
-                    <div class="section-title">&lt;select&gt; — your own list, works without JavaScript</div>
-
-                    <select class="country-select form-select" name="shipping" required>
-                        <option value="">Choose shipping country</option>
-                        <option value="GR">Greece (1-2 days)</option>
-                        <option value="CY">Cyprus (3-4 days)</option>
-                        <option value="DE">Germany (4-6 days)</option>
-                        <option value="IT">Italy (4-6 days)</option>
-                    </select>
-
-                </div>
-
-
-                <!-- DEMO 5 -->
-
-                <div class="demo-card">
-
-                    <div class="section-title">Localized names (data-lang="el") + accent-insensitive search</div>
-
-                    <input
-                            type="text"
-                            class="country-select form-control"
-                            name="country_el"
-                            value="GR"
-                            data-lang="el"
-                            data-preferred="GR,CY">
-
-                </div>
-
-
-                <!-- DEMO 6 -->
-
-                <div class="demo-card" data-bs-theme="dark" style="background:#212529">
-
-                    <div class="section-title">Bootstrap dark mode (data-bs-theme="dark")</div>
-
-                    <input
-                            type="text"
-                            class="country-select"
-                            name="country_dark"
-                            value="NL">
-
-                </div>
-
-
-                <div class="text-center">
-
-                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                        Submit Form
-                    </button>
-
-                </div>
-
-            </form>
-
-
-            <!-- README SUMMARY -->
-
-            <div class="demo-card">
-
-                <div class="section-title">About CountrySelect Pro</div>
-
-                <p>
-
-                    CountrySelect Pro is a lightweight and dependency-free country picker built with vanilla JavaScript.
-
-                    It provides fast searching, phone prefix selection and Bootstrap-friendly UI while keeping the
-                    bundle extremely small.
-
-                </p>
-
-                <ul>
-
-                    <li>🚀 Zero dependencies</li>
-                    <li>🎨 Bootstrap 5 (and dark mode) or plain CSS with <code>--cs-*</code> variables</li>
-                    <li>📋 Built-in list or your own: array, JSON, URL, &lt;select&gt;</li>
-                    <li>🔍 Accent-insensitive search by name, ISO or phone code</li>
-                    <li>🌐 Country names in any language</li>
-                    <li>♿ Keyboard &amp; screen reader accessible</li>
-                    <li>🔁 htmx ready</li>
-
-                </ul>
-
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
             </div>
 
-
-            <!-- BASIC USAGE -->
-
-            <div class="demo-card">
-
-                <div class="section-title">Basic Usage</div>
-
-                <div class="code-box">
-
-                    &lt;input class="country-select" name="country" value="GR"&gt;<br><br>
-
-                    &lt;!-- or with JavaScript --&gt;<br>
-                    &lt;input id="country" name="country"&gt;<br>
-                    &lt;script&gt;<br>
-                    &nbsp;&nbsp;new CountrySelect("#country", { defaultCountry: "GR", preferredCountries: ["GR", "CY"] });<br>
-                    &lt;/script&gt;
-
-                </div>
-
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-preferred"><div class="card-body">
+                    <h3 class="card-title">Preferred countries</h3>
+                    <p class="card-text">Shown first, with a divider. A shared phone code (<code>+1</code>) resolves to the main country.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <input type="text" class="country-select" name="country" value="CY"
+                               data-preferred="GR,CY,BG" data-placeholder="Select country"
+                               data-schema-return="{img} {name} ({code})">
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
             </div>
 
-
-            <div class="text-center mt-5 mb-5">
-
-                <p>
-                    Made with ❤️ by
-                    <a href="https://github.com/nikmauro" target="_blank">
-                        nikmauro
-                    </a>
-                </p>
-
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-select"><div class="card-body">
+                    <h3 class="card-title">&lt;select&gt; – progressive enhancement</h3>
+                    <p class="card-text">Your own list in the HTML: works without JavaScript and is crawlable. Option texts are kept.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <select class="country-select form-select" name="shipping" aria-label="Shipping country">
+                            <option value="">Choose shipping country</option>
+                            <option value="GR">Greece · 1–2 days</option>
+                            <option value="CY" selected>Cyprus · 3–4 days</option>
+                            <option value="DE">Germany · 4–6 days</option>
+                            <option value="IT">Italy · 4–6 days</option>
+                        </select>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
             </div>
 
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-json"><div class="card-body">
+                    <h3 class="card-title">Custom list – inline JSON</h3>
+                    <p class="card-text">Codes only, or your own names / values. <code>"flag": false</code> for non-country items, <code>data-sort="false"</code> keeps your order.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <input type="text" class="country-select" name="delivery" aria-label="Delivery area"
+                               data-sort="false" data-placeholder="Delivery area"
+                               data-countries='[{"code":"GR","name":"Greece – mainland"},{"code":"GR","value":"GR-ISL","name":"Greece – islands"},"CY",{"value":"PICKUP","name":"Store pickup","flag":false}]'>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-ajax"><div class="card-body">
+                    <h3 class="card-title">Custom list – URL / ajax</h3>
+                    <p class="card-text">Any JSON: <code>[...]</code>, <code>{countries: [...]}</code>, <code>{"GR": "Greece"}</code>. Missing names / phone codes come from the built-in list.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <input type="text" class="country-select" name="country" aria-label="Country we ship to"
+                               data-src="examples/shipping.json" data-schema="{img} {name} {phone}">
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-lang"><div class="card-body">
+                    <h3 class="card-title">Localized names</h3>
+                    <p class="card-text"><code>data-lang</code> translates country names with <code>Intl.DisplayNames</code> (any language). Search accepts both: <em>ελλαδα</em> or <em>greece</em>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div class="row g-2">
+                            <div class="col-sm-6"><input type="text" class="country-select" name="country_el" value="GR" data-lang="el" data-preferred="GR,CY" aria-label="Χώρα"></div>
+                            <div class="col-sm-6"><input type="text" class="country-select" name="country_de" value="DE" data-lang="de" aria-label="Land"></div>
+                        </div>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-validation"><div class="card-body">
+                    <h3 class="card-title">Validation</h3>
+                    <p class="card-text"><code>required</code> works with native validation, Bootstrap's <code>.was-validated</code> and <code>.is-invalid</code>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <form novalidate>
+                            <input type="text" class="country-select" name="country" required
+                                   data-placeholder="Required field" aria-label="Country (required)">
+                            <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+                        </form>
+                    </template>
+                    <script type="text/x-example">
+                        const form = document.querySelector('#ex-validation form');
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            form.classList.add('was-validated');
+                        });
+                    </script>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-events"><div class="card-body">
+                    <h3 class="card-title">Events &amp; API</h3>
+                    <p class="card-text"><code>country-change</code> (plus <code>change</code> / <code>input</code>) and methods on the instance.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <input type="text" class="country-select" id="api-country" value="GR" aria-label="Country">
+                        <div class="btn-group btn-group-sm mt-2 flex-wrap">
+                            <button type="button" class="btn btn-outline-primary" data-run="setValue">setValue('CY')</button>
+                            <button type="button" class="btn btn-outline-primary" data-run="open">open()</button>
+                            <button type="button" class="btn btn-outline-primary" data-run="getCountry">getCountry()</button>
+                        </div>
+                        <pre class="small bg-body-tertiary rounded p-2 mt-2 mb-0" id="api-log" style="height:5.5rem;overflow:auto" aria-live="polite"></pre>
+                    </template>
+                    <script type="text/x-example">
+                        const input = document.getElementById('api-country');
+                        const log = (msg) => { document.getElementById('api-log').textContent = msg + '\n' + document.getElementById('api-log').textContent; };
+
+                        input.addEventListener('country-change', (e) => log('country-change → ' + JSON.stringify(e.detail.country)));
+
+                        document.querySelector('#ex-events .btn-group').addEventListener('click', (e) => {
+                            const cs = CountrySelect.getInstance(input);
+                            const run = e.target.dataset.run;
+                            if (run === 'setValue') cs.setValue('CY');
+                            if (run === 'open') { e.stopPropagation(); cs.open(); }
+                            if (run === 'getCountry') log('getCountry() → ' + JSON.stringify(cs.getCountry()));
+                        });
+                    </script>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-theme"><div class="card-body">
+                    <h3 class="card-title">Plain CSS theme (no framework)</h3>
+                    <p class="card-text">Set <code>--cs-*</code> variables on any parent. Without Bootstrap the defaults are used.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div class="my-theme">
+                            <input type="text" class="country-select" name="country" value="JP" aria-label="Country">
+                        </div>
+                        <style>
+                            .my-theme {
+                                --cs-bg: #fffaf3; --cs-color: #3b2a1a; --cs-border-color: #e3c9a8;
+                                --cs-radius: 999px; --cs-hover-bg: #fdebd3; --cs-search-bg: #fff4e6;
+                                --cs-active-bg: #c2410c; --cs-active-color: #fff;
+                                --cs-focus-border: #c2410c; --cs-focus-ring: rgba(194, 65, 12, .25);
+                            }
+                        </style>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-states"><div class="card-body">
+                    <h3 class="card-title">Disabled · readonly · no search · no flags</h3>
+                    <p class="card-text">States follow the input; <code>data-country-search="false"</code>, <code>data-flags="false"</code>.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div class="row g-2">
+                            <div class="col-sm-6"><input type="text" class="country-select" value="FR" disabled aria-label="Disabled"></div>
+                            <div class="col-sm-6"><input type="text" class="country-select" value="IT" readonly aria-label="Readonly"></div>
+                            <div class="col-sm-6"><input type="text" class="country-select" value="ES" data-country-search="false" aria-label="No search"></div>
+                            <div class="col-sm-6"><input type="text" class="country-select" value="PT" data-flags="false" aria-label="No flags"></div>
+                        </div>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
+
+            <div class="col-lg-6">
+                <article class="card card-demo ex" id="ex-dark" data-bs-theme="dark" style="background:#212529"><div class="card-body">
+                    <h3 class="card-title">Bootstrap dark mode</h3>
+                    <p class="card-text">Inside <code>data-bs-theme="dark"</code> colors follow Bootstrap automatically – no extra CSS.</p>
+                    <div class="ex-demo"></div>
+                    <template>
+                        <div data-bs-theme="dark">
+                            <input type="text" class="country-select" name="country" value="NL" aria-label="Country">
+                        </div>
+                    </template>
+                    <div class="code-wrap"><pre class="code"><code></code></pre></div>
+                </div></article>
+            </div>
 
         </div>
-    </div>
-</div>
+
+        <p class="mt-4 mb-0">More: <a href="examples/htmx.html">htmx (swap, morph, history)</a> · <a href="examples/plain.html">without any framework</a> · <a href="examples/api.html">JavaScript API</a> · <a href="examples/">all examples</a></p>
+    </section>
+
+    <!-- PLAYGROUND -->
+    <section class="section" id="playground" aria-labelledby="playground-h">
+        <h2 id="playground-h">Playground</h2>
+        <p class="lead-sm">Change the settings – the preview and the code update live.</p>
+
+        <div class="card card-demo"><div class="card-body">
+            <div class="row g-4">
+                <form class="col-lg-5" id="pg" autocomplete="off">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-valueType">Value type</label>
+                            <select class="form-select form-select-sm" id="pg-valueType" data-attr="value-type" data-opt="valueType" data-def="code">
+                                <option value="code">code (GR)</option>
+                                <option value="phone">phone (+30)</option>
+                                <option value="name">name (Greece)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-value">Initial value</label>
+                            <input class="form-control form-control-sm" id="pg-value" value="GR">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-schema">List template</label>
+                            <input class="form-control form-control-sm" id="pg-schema" data-attr="schema" data-opt="schema" data-def="{img} {name}" value="{img} {name}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-schemaReturn">Selected template</label>
+                            <input class="form-control form-control-sm" id="pg-schemaReturn" data-attr="schema-return" data-opt="schemaReturn" placeholder="same as list">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-preferred">Preferred</label>
+                            <input class="form-control form-control-sm" id="pg-preferred" data-attr="preferred" data-opt="preferredCountries" data-list value="GR,CY">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-only">Only countries</label>
+                            <input class="form-control form-control-sm" id="pg-only" data-attr="only-countries" data-opt="onlyCountries" data-list placeholder="e.g. GR,CY,DE">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-exclude">Exclude</label>
+                            <input class="form-control form-control-sm" id="pg-exclude" data-attr="exclude-countries" data-opt="excludeCountries" data-list placeholder="e.g. AQ,UM">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-default">Default country</label>
+                            <input class="form-control form-control-sm" id="pg-default" data-attr="default-country" data-opt="defaultCountry" placeholder="when empty">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-lang">Language of names</label>
+                            <select class="form-select form-select-sm" id="pg-lang" data-attr="lang" data-opt="lang">
+                                <option value="">English (data)</option>
+                                <option value="auto">auto (&lt;html lang&gt;)</option>
+                                <option value="el">Ελληνικά (el)</option>
+                                <option value="de">Deutsch (de)</option>
+                                <option value="fr">Français (fr)</option>
+                                <option value="es">Español (es)</option>
+                                <option value="it">Italiano (it)</option>
+                                <option value="tr">Türkçe (tr)</option>
+                                <option value="ar">العربية (ar)</option>
+                                <option value="ja">日本語 (ja)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small" for="pg-placeholder">Placeholder</label>
+                            <input class="form-control form-control-sm" id="pg-placeholder" data-attr="placeholder" data-opt="placeholder" placeholder="Select">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small" for="pg-rows">Rows</label>
+                            <input type="number" min="2" max="15" class="form-control form-control-sm" id="pg-rows" data-attr="country-row-values" data-opt="rows" data-def="5" value="5">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small" for="pg-width">Dropdown width</label>
+                            <input class="form-control form-control-sm" id="pg-width" data-attr="dropdown-width" data-opt="dropdownWidth" data-def="auto" value="auto">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small" for="pg-accent">Accent color</label>
+                            <input type="color" class="form-control form-control-sm form-control-color w-100" id="pg-accent" value="#0d6efd">
+                        </div>
+                        <div class="col-12 d-flex flex-wrap gap-3 mt-2">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="pg-search" data-attr="country-search" data-opt="search" data-bool checked><label class="form-check-label small" for="pg-search">Search</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="pg-flags" data-attr="flags" data-opt="flags" data-bool checked><label class="form-check-label small" for="pg-flags">Flags</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="pg-sort" data-attr="sort" data-opt="sort" data-bool checked><label class="form-check-label small" for="pg-sort">Sort</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="pg-required"><label class="form-check-label small" for="pg-required">Required</label></div>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="pg-reset">Reset</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="col-lg-7">
+                    <div class="small fw-semibold text-body-secondary mb-1">Preview</div>
+                    <div id="pg-preview" class="mb-2"></div>
+                    <div class="pg-out text-body-secondary mb-3">value: <code id="pg-val"></code> · country: <code id="pg-country"></code></div>
+
+                    <div class="small fw-semibold text-body-secondary mb-1">HTML</div>
+                    <div class="code-wrap mb-3"><pre class="code"><code id="pg-html"></code></pre></div>
+
+                    <div class="small fw-semibold text-body-secondary mb-1">or JavaScript</div>
+                    <div class="code-wrap"><pre class="code"><code id="pg-js"></code></pre></div>
+                </div>
+            </div>
+        </div></div>
+    </section>
+
+    <!-- OPTIONS -->
+    <section class="section" id="options" aria-labelledby="options-h">
+        <h2 id="options-h">Options</h2>
+        <p class="lead-sm">As <code>data-*</code> attributes, JavaScript options (they win) or global defaults in <code>window.CountrySelectConfig</code>.</p>
+        <div class="card card-demo"><div class="card-body table-responsive">
+            <table class="table table-sm table-opts mb-0">
+                <thead><tr><th scope="col">Attribute</th><th scope="col">JS option</th><th scope="col">Default</th><th scope="col">Description</th></tr></thead>
+                <tbody>
+                <tr><td><code>data-value-type</code></td><td><code>valueType</code></td><td><code>code</code></td><td>Value written to the input: <code>code</code> (ISO), <code>phone</code> (<code>+30</code>) or <code>name</code></td></tr>
+                <tr><td><code>data-schema</code></td><td><code>schema</code></td><td><code>{img} {name}</code></td><td>Template of list items: <code>{img}</code> <code>{name}</code> <code>{code}</code> <code>{phone}</code></td></tr>
+                <tr><td><code>data-schema-return</code></td><td><code>schemaReturn</code></td><td>= schema</td><td>Template of the selected value</td></tr>
+                <tr><td><code>data-preferred</code></td><td><code>preferredCountries</code></td><td>–</td><td>Codes shown first, e.g. <code>GR,CY</code></td></tr>
+                <tr><td><code>data-only-countries</code></td><td><code>onlyCountries</code></td><td>–</td><td>Show only these codes</td></tr>
+                <tr><td><code>data-exclude-countries</code></td><td><code>excludeCountries</code></td><td>–</td><td>Hide these codes</td></tr>
+                <tr><td><code>data-default-country</code></td><td><code>defaultCountry</code></td><td>–</td><td>ISO code selected when the input is empty</td></tr>
+                <tr><td><code>data-placeholder</code></td><td><code>placeholder</code></td><td><code>Select</code></td><td>Text when nothing is selected (a <code>&lt;select&gt;</code> uses its empty option)</td></tr>
+                <tr><td><code>data-country-search</code></td><td><code>search</code></td><td><code>true</code></td><td>Search box</td></tr>
+                <tr><td><code>data-search-placeholder</code></td><td><code>searchPlaceholder</code></td><td><code>Search...</code></td><td>Search box placeholder / label</td></tr>
+                <tr><td><code>data-no-results</code></td><td><code>noResults</code></td><td><code>Not found</code></td><td>Empty search text</td></tr>
+                <tr><td><code>data-country-row-values</code></td><td><code>rows</code></td><td><code>5</code></td><td>Visible rows</td></tr>
+                <tr><td><code>data-dropdown-width</code></td><td><code>dropdownWidth</code></td><td><code>auto</code></td><td>e.g. <code>300px</code></td></tr>
+                <tr><td><code>data-lang</code></td><td><code>lang</code></td><td>–</td><td>Language of names and texts: <code>el</code>, <code>de</code> … or <code>auto</code> (<code>&lt;html lang&gt;</code>)</td></tr>
+                <tr><td><code>data-flags</code></td><td><code>flags</code></td><td><code>true</code></td><td><code>false</code> = no flags</td></tr>
+                <tr><td><code>data-sort</code></td><td><code>sort</code></td><td><code>true</code></td><td><code>false</code> = keep the order of your list</td></tr>
+                <tr><td><code>data-countries</code></td><td><code>countries</code></td><td>–</td><td>Your list: JSON / array / function (may return a Promise)</td></tr>
+                <tr><td><code>data-src</code></td><td><code>dataUrl</code></td><td>–</td><td>URL of your list (JSON)</td></tr>
+                <tr><td><code>data-base-url</code></td><td><code>baseUrl</code></td><td>jsDelivr</td><td>Folder with <code>dist/data.json</code> and <code>dist/flags/</code> (self-hosting)</td></tr>
+                <tr><td><code>data-flag-path</code></td><td><code>flagPath</code></td><td><code>{baseUrl}dist/flags/4x3/{code}.svg</code></td><td>Flag URL template (<code>{code}</code> = gr, <code>{CODE}</code> = GR)</td></tr>
+                <tr><td>–</td><td><code>fetchOptions</code></td><td>–</td><td><code>fetch()</code> options for <code>dataUrl</code></td></tr>
+                <tr><td>–</td><td><code>merge</code></td><td><code>true</code></td><td>Fill missing names / phone codes of your list from the built-in list</td></tr>
+                <tr><td colspan="2"><code>window.CountrySelectConfig</code></td><td>–</td><td>Global defaults (any option) + <code>css: false</code> (no built-in CSS), <code>autoInit: false</code></td></tr>
+                </tbody>
+            </table>
+        </div></div>
+    </section>
+
+    <!-- API -->
+    <section class="section" id="api" aria-labelledby="api-h">
+        <h2 id="api-h">Events &amp; API</h2>
+        <p class="lead-sm">Elements with the class <code>country-select</code> are initialized automatically (also after htmx swaps); <code>new CountrySelect(el | '#selector', options)</code> for manual use.</p>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card card-demo"><div class="card-body table-responsive">
+                    <h3 class="card-title">Methods</h3>
+                    <table class="table table-sm table-opts mb-0">
+                        <tbody>
+                        <tr><td><code>CountrySelect.getInstance(el)</code></td><td>Instance of an element (or <code>null</code>)</td></tr>
+                        <tr><td><code>CountrySelect.init(root)</code></td><td>Initialize <code>.country-select</code> inside <code>root</code></td></tr>
+                        <tr><td><code>cs.setValue(v, {silent})</code></td><td>Select by value; sends events unless <code>silent</code></td></tr>
+                        <tr><td><code>cs.getValue()</code></td><td>Current value</td></tr>
+                        <tr><td><code>cs.getCountry()</code></td><td><code>{code, name, localName, phone, value}</code> or <code>null</code></td></tr>
+                        <tr><td><code>cs.open()</code> · <code>close()</code> · <code>toggle()</code></td><td>Dropdown</td></tr>
+                        <tr><td><code>cs.setCountries(list)</code></td><td>New list: array, function, JSON, URL</td></tr>
+                        <tr><td><code>cs.refresh()</code></td><td>Re-read the value after <code>input.value = …</code></td></tr>
+                        <tr><td><code>cs.destroy()</code></td><td>Remove the widget, restore the input</td></tr>
+                        <tr><td><code>cs.ready</code></td><td>Promise – resolved when the list is loaded</td></tr>
+                        </tbody>
+                    </table>
+                </div></div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card card-demo"><div class="card-body">
+                    <h3 class="card-title">Events (on the input)</h3>
+                    <div class="code-wrap"><pre class="code" data-copy>input.addEventListener('country-change', (e) => {
+    e.detail.value;    // "GR"
+    e.detail.country;  // {code, name, localName, phone, value}
+});
+
+// change / input are dispatched too:
+// &lt;input class="country-select" hx-get="/zip" hx-trigger="change"&gt;</pre></div>
+                    <h3 class="card-title mt-4" id="keyboard">Keyboard</h3>
+                    <table class="table table-sm table-opts mb-0">
+                        <tbody>
+                        <tr><td><kbd>↓</kbd> <kbd>↑</kbd> <kbd>Enter</kbd> <kbd>Space</kbd></td><td>Open (closed) · move / select (open)</td></tr>
+                        <tr><td>a letter</td><td>Open and search</td></tr>
+                        <tr><td><kbd>Home</kbd> <kbd>End</kbd> <kbd>PgUp</kbd> <kbd>PgDn</kbd></td><td>First · last · page</td></tr>
+                        <tr><td><kbd>Esc</kbd> · <kbd>Tab</kbd></td><td>Close (a surrounding modal stays open) · leave</td></tr>
+                        </tbody>
+                    </table>
+                </div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEMING -->
+    <section class="section" id="theming" aria-labelledby="theming-h">
+        <h2 id="theming-h">Theming</h2>
+        <p class="lead-sm">Bootstrap 5: nothing to do (light / dark). Anything else: CSS variables on any parent or <code>:root</code>.</p>
+        <div class="card card-demo"><div class="card-body table-responsive">
+            <table class="table table-sm table-opts mb-0">
+                <thead><tr><th scope="col">Variable</th><th scope="col">Falls back to</th><th scope="col">Used for</th></tr></thead>
+                <tbody>
+                <tr><td><code>--cs-bg</code></td><td><code>--bs-body-bg</code> · #fff</td><td>Control and search background</td></tr>
+                <tr><td><code>--cs-color</code></td><td><code>--bs-body-color</code> · #212529</td><td>Text and arrow</td></tr>
+                <tr><td><code>--cs-border-color</code></td><td><code>--bs-border-color</code> · #ced4da</td><td>Borders</td></tr>
+                <tr><td><code>--cs-radius</code></td><td><code>--bs-border-radius</code> · .375rem</td><td>Corners</td></tr>
+                <tr><td><code>--cs-font-size</code></td><td>1rem</td><td>Control text</td></tr>
+                <tr><td><code>--cs-focus-border</code> · <code>--cs-focus-ring</code></td><td>#86b7fe · <code>--bs-focus-ring-color</code></td><td>Focus</td></tr>
+                <tr><td><code>--cs-hover-bg</code></td><td><code>--bs-tertiary-bg</code></td><td>Option hover</td></tr>
+                <tr><td><code>--cs-active-bg</code> · <code>--cs-active-color</code></td><td><code>--bs-primary</code> · #fff</td><td>Highlighted option</td></tr>
+                <tr><td><code>--cs-muted</code></td><td><code>--bs-secondary-color</code></td><td>Placeholder, messages</td></tr>
+                <tr><td><code>--cs-search-bg</code></td><td><code>--bs-tertiary-bg</code></td><td>Search area</td></tr>
+                <tr><td><code>--cs-dropdown-bg</code> · <code>--cs-dropdown-border-color</code></td><td>--cs-bg · <code>--bs-border-color-translucent</code></td><td>Dropdown</td></tr>
+                <tr><td><code>--cs-divider-color</code></td><td><code>--bs-border-color</code></td><td>Divider after preferred</td></tr>
+                <tr><td><code>--cs-invalid</code></td><td><code>--bs-form-invalid-border-color</code></td><td>Invalid state</td></tr>
+                <tr><td><code>--cs-disabled-bg</code></td><td><code>--bs-secondary-bg</code></td><td>Disabled state</td></tr>
+                <tr><td><code>--cs-shadow</code> · <code>--cs-z-index</code></td><td>– · 2050</td><td>Dropdown shadow, stacking</td></tr>
+                </tbody>
+            </table>
+        </div></div>
+    </section>
+
+</main>
+
+<footer class="border-top py-4 text-center small text-body-secondary">
+    Made with ❤️ by <a href="https://github.com/nikmauro">nikmauro</a> ·
+    <a href="https://github.com/nikmauro/country-select-pro">GitHub</a> ·
+    <a href="https://github.com/nikmauro/country-select-pro/blob/main/CHANGELOG.md">Changelog</a> · MIT
+</footer>
+
 <script src="../dist/country-select.js"></script>
-<!--<script src="https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.2/dist/country-select.js"></script>-->
+<script>
+(function () {
+    'use strict';
+
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); };
+    var dedent = function (s) {
+        var lines = s.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+        var min = Math.min.apply(null, lines.filter(function (l) { return l.trim(); }).map(function (l) { return l.match(/^ */)[0].length; }));
+        return lines.map(function (l) { return l.slice(min); }).join('\n');
+    };
+
+    /* θέμα */
+    var root = document.documentElement, toggle = document.getElementById('theme-toggle');
+    var paint = function () {
+        var dark = root.getAttribute('data-bs-theme') === 'dark';
+        toggle.textContent = dark ? '☀️' : '🌙';
+        toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    };
+    toggle.addEventListener('click', function () {
+        var t = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-bs-theme', t);
+        try { localStorage.setItem('cs-demo-theme', t); } catch (e) { /* χωρίς storage */ }
+        paint();
+    });
+    paint();
+
+    /* έκδοση */
+    if (window.CountrySelect) document.querySelectorAll('[data-version]').forEach(function (el) { el.textContent = CountrySelect.version; });
+
+    /* αντιγραφή κώδικα */
+    var addCopy = function (wrap, getText) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-sm btn-light copy-btn';
+        b.textContent = 'Copy';
+        b.addEventListener('click', function () {
+            var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1200); };
+            if (navigator.clipboard) navigator.clipboard.writeText(getText()).then(done, function () { b.textContent = 'Select & copy'; });
+        });
+        wrap.appendChild(b);
+    };
+    document.querySelectorAll('pre[data-copy]').forEach(function (pre) { addCopy(pre.parentNode, function () { return pre.textContent; }); });
+
+    /* παραδείγματα: το ίδιο HTML τρέχει και φαίνεται */
+    document.querySelectorAll('.ex').forEach(function (card) {
+        var html = dedent(card.querySelector('template').innerHTML);
+        card.querySelector('.ex-demo').innerHTML = html; // το auto-init τα στήνει
+        var code = html, js = card.querySelector('script[type="text/x-example"]');
+        if (js) {
+            var src = dedent(js.textContent);
+            code += '\n\n<script>\n' + src + '\n</' + 'script>';
+            try { new Function(src)(); } catch (e) { console.error(e); }
+        }
+        card.querySelector('pre code').innerHTML = esc(code);
+        addCopy(card.querySelector('.code-wrap'), function () { return code; });
+    });
+
+    /* playground */
+    var form = document.getElementById('pg'), preview = document.getElementById('pg-preview');
+    var fields = Array.prototype.slice.call(form.querySelectorAll('[data-attr]'));
+    var defaults = {};
+    form.querySelectorAll('input, select').forEach(function (el) { defaults[el.id] = el.type === 'checkbox' ? el.checked : el.value; });
+
+    var build = function () {
+        var attrs = [['type', 'text'], ['class', 'country-select'], ['name', 'country']];
+        var opts = [];
+        var value = document.getElementById('pg-value').value.trim();
+        if (value) attrs.push(['value', value]);
+        if (document.getElementById('pg-required').checked) attrs.push(['required', '']);
+        fields.forEach(function (el) {
+            var v, js;
+            if (el.hasAttribute('data-bool')) {
+                if (el.checked) return;
+                v = 'false';
+                js = 'false';
+            } else {
+                v = el.value.trim();
+                if (!v || v === el.getAttribute('data-def')) return;
+                if (el.hasAttribute('data-list')) js = JSON.stringify(v.split(',').map(function (c) { return c.trim().toUpperCase(); }).filter(Boolean));
+                else if (el.type === 'number') js = String(parseInt(v, 10));
+                else js = JSON.stringify(v);
+            }
+            attrs.push(['data-' + el.getAttribute('data-attr'), v]);
+            opts.push('    ' + el.getAttribute('data-opt') + ': ' + js.replace(/"/g, "'"));
+        });
+
+        var accent = document.getElementById('pg-accent').value;
+        var themed = accent.toLowerCase() !== '#0d6efd';
+        var inputHtml = '<input ' + attrs.map(function (a) { return a[1] === '' ? a[0] : a[0] + '="' + esc(a[1]) + '"'; }).join('\n       ') + '>';
+        var styleHtml = themed ? '<style>\n  :root { --cs-active-bg: ' + accent + '; --cs-focus-border: ' + accent + '; }\n</style>\n' : '';
+
+        var old = preview.querySelector('.country-select');
+        if (old && CountrySelect.getInstance(old)) CountrySelect.getInstance(old).destroy();
+        preview.style.cssText = themed ? '--cs-active-bg:' + accent + ';--cs-focus-border:' + accent + ';--cs-focus-ring:' + accent + '40' : '';
+        preview.innerHTML = inputHtml;
+
+        document.getElementById('pg-html').innerHTML = esc(styleHtml + inputHtml);
+        var jsAttrs = attrs.filter(function (a) { return a[0] === 'value' || a[0] === 'name' || a[0] === 'required' || a[0] === 'type'; });
+        document.getElementById('pg-js').innerHTML = esc(
+            '<input ' + jsAttrs.map(function (a) { return a[1] === '' ? a[0] : a[0] + '="' + a[1] + '"'; }).join(' ') + ' id="country">\n\n' +
+            'new CountrySelect(\'#country\'' + (opts.length ? ', {\n' + opts.join(',\n') + '\n}' : '') + ');'
+        );
+
+        var input = preview.querySelector('.country-select');
+        var show = function () {
+            var cs = CountrySelect.getInstance(input);
+            document.getElementById('pg-val').textContent = JSON.stringify(input.value);
+            document.getElementById('pg-country').textContent = cs ? JSON.stringify(cs.getCountry()) : '…';
+        };
+        input.addEventListener('country-change', show);
+        CountrySelect.init(preview); // αμέσως (το auto-init τρέχει στο DOMContentLoaded)
+        CountrySelect.getInstance(input).ready.then(show);
+    };
+
+    var timer;
+    form.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(build, 250); });
+    form.addEventListener('change', function () { clearTimeout(timer); timer = setTimeout(build, 50); });
+    document.getElementById('pg-reset').addEventListener('click', function () {
+        form.querySelectorAll('input, select').forEach(function (el) { if (el.type === 'checkbox') el.checked = defaults[el.id]; else el.value = defaults[el.id]; });
+        build();
+    });
+    document.getElementById('pg-valueType').addEventListener('change', function (e) {
+        var v = {code: 'GR', phone: '+30', name: 'Greece'}[e.target.value];
+        document.getElementById('pg-value').value = v;
+        if (e.target.value === 'phone' && document.getElementById('pg-schemaReturn').value === '') document.getElementById('pg-schemaReturn').value = '{img} {phone}';
+    });
+    build();
+})();
+</script>
 </body>
 </html>

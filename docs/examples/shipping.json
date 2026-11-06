@@ -1,0 +1,10 @@
+{
+  "countries": [
+    {"code": "GR", "name": "Greece"},
+    {"code": "CY", "name": "Cyprus"},
+    {"code": "BG"},
+    {"code": "DE"},
+    {"code": "IT", "keywords": "italia"},
+    {"code": "FR"}
+  ]
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&lt;select&gt; progressive enhancement – CountrySelect Pro examples</title>
+    <meta name="description" content="CountrySelect Pro on a native select: the list is in the HTML, works without JavaScript, crawlable, with your own option texts and data-phone / data-flag.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-body-tertiary">
+<main class="container py-4" style="max-width: 760px">
+    <p><a href="./">← All examples</a></p>
+    <h1 class="h3">&lt;select&gt; – progressive enhancement</h1>
+    <p class="text-body-secondary">The options are in your HTML: the form works without JavaScript and search engines see the list. With JavaScript the select becomes the searchable country picker – the submitted value is still the select's.</p>
+
+    <form class="card card-body" action="#" method="get">
+        <label class="form-label" for="ship">Shipping country</label>
+        <select class="country-select form-select" id="ship" name="shipping_country" required>
+            <option value="">Choose a country</option>
+            <option value="GR">Greece · €3.50</option>
+            <option value="CY">Cyprus · €9.00</option>
+            <option value="BG">Bulgaria · €12.00</option>
+            <option value="DE">Germany · €14.00</option>
+            <option value="XK" data-flag="https://cdn.jsdelivr.net/gh/nikmauro/country-select-pro@6.1.3/dist/flags/4x3/xk.svg">Kosovo · €14.00</option>
+        </select>
+
+        <label class="form-label mt-3" for="code">Phone code (values are phone codes)</label>
+        <select class="country-select form-select" id="code" name="phone_code" data-value-type="phone" data-schema="{img} {name} {phone}" data-schema-return="{img} {phone}">
+            <option value="+30" data-code="GR" selected>Greece</option>
+            <option value="+357" data-code="CY">Cyprus</option>
+            <option value="+1" data-code="CA">Canada</option>
+            <option value="+1" data-code="US">United States</option>
+        </select>
+
+        <button class="btn btn-primary mt-3 align-self-start" type="submit">Submit (GET)</button>
+        <p class="small text-body-secondary mt-2 mb-0">Submitted: <code id="submitted">–</code></p>
+    </form>
+</main>
+
+<!-- CDN: https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js -->
+<script src="../../dist/country-select.js"></script>
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        document.getElementById('submitted').textContent = new URLSearchParams(new FormData(e.target)).toString();
+    });
+</script>
+</body>
+</html>

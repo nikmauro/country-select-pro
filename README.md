@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/country-select-pro)](https://www.npmjs.com/package/country-select-pro)
 [![jsDelivr](https://data.jsdelivr.com/v1/package/npm/country-select-pro/badge)](https://www.jsdelivr.com/package/npm/country-select-pro)
 ![Vanilla JS](https://img.shields.io/badge/Vanilla-JavaScript-yellow)
-![Size](https://img.shields.io/badge/gzip-~7KB-brightgreen)
+![Size](https://img.shields.io/badge/gzip-~9KB-brightgreen)
 
 A **lightweight, zero-dependency, vanilla JavaScript country selector** with flags, phone codes, search, keyboard and screen-reader support. Works with **Bootstrap 5** (including dark mode) or **without any framework**.
 
@@ -25,7 +25,9 @@ A **lightweight, zero-dependency, vanilla JavaScript country selector** with fla
 
 ## 🎮 Live Demo
 
-https://nikmauro.github.io/country-select-pro/docs/
+* **Demo, examples & settings playground:** https://nikmauro.github.io/country-select-pro/docs/
+* **Standalone examples:** [htmx](https://nikmauro.github.io/country-select-pro/docs/examples/htmx.html) · [without a framework](https://nikmauro.github.io/country-select-pro/docs/examples/plain.html) · [`<select>`](https://nikmauro.github.io/country-select-pro/docs/examples/select.html) · [JavaScript API](https://nikmauro.github.io/country-select-pro/docs/examples/api.html)
+* **What's new:** [CHANGELOG](CHANGELOG.md)
 
 ---
 
@@ -225,7 +227,9 @@ dist/
 ├─ country-select.min.js    built by `npm run build` (published to npm, not in git)
 ├─ data.json                countries: names, ISO codes, phone codes
 └─ flags/                   SVG flags (4x3, 1x1)
-docs/index.html             live demo
+docs/index.html             live demo, examples, settings playground
+docs/examples/              standalone examples (htmx, plain CSS, <select>, API)
+CHANGELOG.md                release notes
 ```
 
 ## 🤝 Contributing

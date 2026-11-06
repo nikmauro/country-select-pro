@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Without a framework – CountrySelect Pro examples</title>
+    <meta name="description" content="CountrySelect Pro without Bootstrap: themed with --cs-* CSS variables, dark theme, Greek country names.">
+    <style>
+        body { margin: 0; font: 16px/1.5 Georgia, 'Times New Roman', serif; background: #f4efe7; color: #2b2118; }
+        main { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+        a { color: #9a3412; }
+        .box { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 18px rgba(0, 0, 0, .06); }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+
+        /* Θέμα: μόνο μεταβλητές */
+        .warm {
+            --cs-bg: #fffaf3; --cs-color: #3b2a1a; --cs-border-color: #e3c9a8; --cs-radius: 10px;
+            --cs-hover-bg: #fdebd3; --cs-search-bg: #fff4e6; --cs-active-bg: #c2410c; --cs-active-color: #fff;
+            --cs-focus-border: #c2410c; --cs-focus-ring: rgba(194, 65, 12, .25); --cs-font-size: 17px;
+        }
+        .night { background: #1c1d22; color: #eee; }
+        .night .country-select-host {
+            --cs-bg: #26282f; --cs-color: #f1f1f1; --cs-border-color: #444851; --cs-muted: #a0a4ad;
+            --cs-hover-bg: #31343c; --cs-search-bg: #202227; --cs-active-bg: #7c5cff; --cs-focus-border: #7c5cff;
+            --cs-focus-ring: rgba(124, 92, 255, .35); --cs-dropdown-border-color: #444851; --cs-divider-color: #444851;
+            --cs-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <p><a href="./">← Όλα τα παραδείγματα</a></p>
+    <h1>Χωρίς framework</h1>
+    <p>Κανένα Bootstrap: η εμφάνιση ορίζεται μόνο με τις μεταβλητές <code>--cs-*</code>. Ονόματα χωρών στα ελληνικά με <code>data-lang="auto"</code> (από το <code>&lt;html lang="el"&gt;</code>).</p>
+
+    <div class="box warm">
+        <label for="c1">Χώρα</label>
+        <input type="text" class="country-select" id="c1" name="country" value="GR" data-lang="auto" data-preferred="GR,CY">
+    </div>
+
+    <div class="box night">
+        <div class="country-select-host">
+            <label for="c2">Κωδικός τηλεφώνου</label>
+            <input type="text" class="country-select" id="c2" name="phone_code" value="+357" data-lang="auto"
+                   data-value-type="phone" data-schema="{img} {name} {phone}" data-schema-return="{img} {phone}">
+        </div>
+    </div>
+
+    <div class="box">
+        <label for="c3">Προεπιλογές (χωρίς θέμα)</label>
+        <input type="text" class="country-select" id="c3" name="country2" data-lang="auto" data-default-country="CY">
+    </div>
+</main>
+
+<!-- CDN: https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js -->
+<script src="../../dist/country-select.js"></script>
+</body>
+</html>

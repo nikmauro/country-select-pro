@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>htmx – CountrySelect Pro examples</title>
+    <meta name="description" content="CountrySelect Pro with htmx: auto-init after swaps, idiomorph morph swaps and cloned rows, country-change as hx-trigger.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idiomorph@0.7.3/dist/idiomorph-ext.min.js"></script>
+</head>
+<body class="bg-body-tertiary" hx-ext="morph">
+<main class="container py-4" style="max-width: 760px">
+    <p><a href="./">← All examples</a></p>
+    <h1 class="h3">htmx</h1>
+    <p class="text-body-secondary">Nothing to call: selectors in swapped, morphed or cloned HTML are initialized automatically.</p>
+
+    <section class="card card-body mb-4">
+        <h2 class="h6">1. Swap (innerHTML)</h2>
+        <div id="swap-zone">
+            <label class="form-label" for="hx-country">Country</label>
+            <input type="text" class="country-select" id="hx-country" name="country" value="GR" data-preferred="GR,CY">
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button class="btn btn-sm btn-outline-primary" hx-get="htmx-partial.html" hx-target="#swap-zone" hx-swap="innerHTML">Swap</button>
+            <button class="btn btn-sm btn-outline-primary" hx-get="htmx-partial.html" hx-target="#swap-zone" hx-swap="morph:innerHTML">Morph (idiomorph)</button>
+        </div>
+    </section>
+
+    <section class="card card-body mb-4">
+        <h2 class="h6">2. <code>country-change</code> as a trigger</h2>
+        <p class="small text-body-secondary mb-2">The event bubbles, so a form can react to it (here it just logs; normally <code>hx-get</code> / <code>hx-post</code>).</p>
+        <form id="trigger-form">
+            <input type="text" class="country-select" name="shipping_country" value="DE" aria-label="Shipping country">
+        </form>
+        <div class="small mt-2" id="trigger-log" aria-live="polite">Pick a country…</div>
+        <pre class="small bg-dark text-light rounded p-2 mt-2 mb-0">&lt;form hx-post="/checkout/refresh" hx-trigger="country-change"&gt;
+  &lt;input class="country-select" name="shipping_country" value="DE"&gt;
+&lt;/form&gt;</pre>
+    </section>
+
+    <section class="card card-body mb-4">
+        <h2 class="h6">3. Cloned rows (“add another”)</h2>
+        <div id="rows">
+            <div class="row-item mb-2"><input type="text" class="country-select" name="countries[]" value="IT" aria-label="Country"></div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="add-row">Add row (cloneNode)</button>
+    </section>
+</main>
+
+<!-- CDN: https://cdn.jsdelivr.net/npm/country-select-pro@6.2.0/dist/country-select.min.js -->
+<script src="../../dist/country-select.js"></script>
+<script>
+    document.getElementById('trigger-form').addEventListener('country-change', function (e) {
+        document.getElementById('trigger-log').textContent = 'country-change → ' + e.detail.value + ' (the form would send hx-post now)';
+    });
+    document.getElementById('add-row').addEventListener('click', function () {
+        var rows = document.getElementById('rows');
+        rows.appendChild(rows.firstElementChild.cloneNode(true)); // the clone is re-initialized automatically
+    });
+</script>
+</body>
+</html>
